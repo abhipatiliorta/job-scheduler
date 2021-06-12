@@ -1,11 +1,11 @@
 'use strict';
-const CCMManager = require('../../biz/ccm.manager');
+const VaultManager = require('../../src/biz/vault.manager');
 const Mocha = require('mocha');
 const mocha = new Mocha();
 const ccmRequest = {};
 
 mocha.run(() => {
-    let ccmManager = new  CCMManager();
+    let vaultManager = new  VaultManager();
     let event = ccmRequest;
-    ccmManager.CCMProcess(event);
+    vaultManager.JobSchedulerProcess();
 });

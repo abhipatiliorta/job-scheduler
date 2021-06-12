@@ -8,11 +8,10 @@ Globals:
     Timeout: 3
 
 Resources:
-  helloFromLambdaFunction:
+  JobSchedulerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
-      Handler: app.lambdaHandler
+      Handler: src/app.lambdaHandler
       Runtime: nodejs14.x
       MemorySize: 128
       Timeout: 100
