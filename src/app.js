@@ -1,5 +1,4 @@
 'use strict';
-require('dotenv').config();
 const VaultManager = require('./biz/vault.manager');
 
 exports.lambdaHandler = async () => {
