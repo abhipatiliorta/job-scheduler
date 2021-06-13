@@ -3,17 +3,12 @@ AWS.config.region = 'eu-west-1';
 const lambda = new AWS.Lambda();
 const {
     RenewalVaultHistoryRepository,
-    RenewalVaultJobScheduleRepository,
-    logger,
-    NotFound,
-    BaseManager,
-} = require("@karthik-iorta/renewal-vault-util");
-const Context = 'CCM';
+    RenewalVaultJobScheduleRepository
+} = require("../repository");
+const { NotFound } = require("../exception");
 
-class VaultManager extends BaseManager {
+class VaultManager {
     constructor(){
-        super();
-
         this.renewalVaultHistoryRepository = new RenewalVaultHistoryRepository();
         this.renewalVaultJobScheduleRepository = new RenewalVaultJobScheduleRepository();
     }
@@ -23,13 +18,13 @@ class VaultManager extends BaseManager {
             const today = new Date();
 
             const JobsDetails = await this.renewalVaultJobScheduleRepository.findByJobStartDateAndTime(today);
-            logger.info(Context, `Fetched Data from Renewal Vault Job Schedule Table : ${JSON.stringify(JobsDetails)}`);
+            console.info(`Fetched Data from Renewal Vault Job Schedule Table : ${JSON.stringify(JobsDetails)}`);
 
             if (JobsDetails.length) {
                 for (const index in JobsDetails) {
                     const jobDetail = JobsDetails[index];
                     let policies = await this.renewalVaultHistoryRepository.findPoliciesByExpiryDate(jobDetail.STAGE, jobDetail.RENEWAL_EXPIRY_DATE_FROM, jobDetail.RENEWAL_EXPIRY_DATE_TO);
-                    logger.info(Context, `Fetched Data from Renewal Vault Job Schedule Table : ${JSON.stringify(JobsDetails)}`);
+                    console.info(`Fetched Data from Renewal Vault Job Schedule Table : ${JSON.stringify(JobsDetails)}`);
 
                     const policyStatus = [];
                     let jobStatus = "Success";
@@ -58,32 +53,32 @@ class VaultManager extends BaseManager {
                                     message: ""
                                 };
                                 if (err) {
-                                    logger.error(err);
+                                    console.error(err);
                                     jobStatus = "Failed";
                                     status.status = "Failed";
                                     status.message = err.message;
                                 } else {
-                                    logger.info(Context, `IPDS response : ${JSON.stringify(data.Payload)}`);
+                                    console.info(`IPDS response : ${JSON.stringify(data.Payload)}`);
                                     status.status = "Success";
                                 }
                                 policyStatus.push(status);
                             });
                         }
                     } else {
-                        logger.error(Context, `No policies found for given time`);
+                        console.error(`No policies found for given time`);
                         throw new NotFound(`No policies found for given time`);
                     }
 
                     updateJobDetails = await this.renewalVaultJobScheduleRepository.UpdateJobStaatus(jobDetail.JOB_ID, jobStatus, policyStatus);
-                    logger.info(Context, `Updated Job Status Into Renewal Vault Job Schedule Table : ${JSON.stringify(updateJobDetails)}`);
+                    console.info(`Updated Job Status Into Renewal Vault Job Schedule Table : ${JSON.stringify(updateJobDetails)}`);
                 }
                 return JobsDetails;
             } else {
-                logger.error(Context, `No entity found for given time`);
+                console.error(`No entity found for given time`);
                 throw new NotFound(`No entity found for given time`);
             }
         } catch (err) {
-            this.err(err);
+            console.error(err);
             throw err;
         }
     }
