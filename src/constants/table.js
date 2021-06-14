@@ -1,7 +1,7 @@
 module.exports = {
     RENEWAL_VAULT: "renewal_vault",
     RENEWAL_VAULT_HISTORY: "renewal_vault_history",
-    RENEWAL_VAULT_JOB_SCHEDULE: "renewal_vault_job_schedule",
+    RENEWAL_VAULT_JOB_SCHEDULE: "RA_Job_schedule", //"renewal_vault_job_schedule",
     RENEWAL_VAULT_LOG: "renewal_vault_log",
     RENEWAL_VAULT_SUMMARY: "renewal_vault_summary",
     RENEWAL_VAULT_GCV: "renewal_vault_gcv",

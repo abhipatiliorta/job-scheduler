@@ -7,21 +7,18 @@ class RenewalVaultJobScheduleRepository {
 
     constructor() { }
 
-    async UpdateJobStaatus(jobId, jobStatus, policyStatus) {
+    async UpdateJobStatus(jobId, JobStartTime, jobStatus, policyStatus) {
         try {
             const params = {
                 TableName: TABLE.RENEWAL_VAULT_JOB_SCHEDULE,
-                UpdateExpression: 'SET JOB_STATUS = :jobStatus, POLICY_STATUS = :policyStatus',
-                ConditionExpression: "JOB_ID = :jobId",
-                ExpressionAttributeValues: {
-                    ':jobId': jobId,
-                    ':jobStatus': jobStatus,
-                    ':policyStatus': policyStatus
+                Key:{ "JOB_ID": jobId.toString(), JOB_START_TIME: JobStartTime.toString() },
+                AttributeValue: {
+                    "JOB_STATUS": jobStatus.toString(),
+                    "POLICY_STATUS": JSON.stringify(policyStatus)
                 }
             };
             const data = await documentClient.update(params).promise();
-            if (data) return data;
-            return null;
+            return data;
 
         } catch (err) {
             throw err;
@@ -33,20 +30,18 @@ class RenewalVaultJobScheduleRepository {
             const date = moment(datetime).format("YYYY-MM-DD");
             const timeTo = moment(datetime).format("HH:mm:ss");
             const timeFrom = moment(datetime).subtract(3, "hours").format("HH:mm:ss");
-            let jobId = new Date().getTime()/10;
-            jobId = Math.round(jobId);
+
             const params = {
                 TableName: TABLE.RENEWAL_VAULT_JOB_SCHEDULE,
-                KeyConditionExpression : 'JOB_ID = :jobId',
-                FilterExpression: 'JOB_START_DATE = :date AND JOB_START_TIME BETWEEN :timeFrom AND :timeTo',
+                FilterExpression: 'JOB_START_TIME BETWEEN :timeFrom AND :timeTo AND JOB_START_DATE = :date AND attribute_not_exists(JOB_RUN_ID)',
                 ExpressionAttributeValues: {
-                    ':date': date,
-                    ':timeFrom': timeFrom,
-                    ':timeTo': timeTo,
-                    ':jobId': jobId
+                    ':date': date.toString(),
+                    ':timeFrom': timeFrom.toString(),
+                    ':timeTo': timeTo.toString(),
                 }
             };
-            const data = await documentClient.query(params).promise();
+
+            const data = await documentClient.scan(params).promise();
             if (data) return data.Items;
             return null;
         } catch (err) {

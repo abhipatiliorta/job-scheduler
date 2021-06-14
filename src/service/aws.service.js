@@ -9,6 +9,7 @@ module.exports = {
     STS: new AWS.STS(),
     SF: new AWS.StepFunctions(),
     documentClient: new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10' }),
+    lmbda: new AWS.Lambda(),
     SNS: new AWS.SNS({ apiVersion: '2010-03-31' }),
     S3: new AWS.S3()
 }

@@ -18,15 +18,14 @@ class RenewalVaultHistoryRepository {
 
             const params = {
                 TableName,
-                KeyConditionExpression : 'DAT_RENEWAL_EXPIRY_DATE BETWEEN :expDateFrom AND :expDateTo', 
-                FilterExpression: 'TXT_STAGE = :stage',
+                FilterExpression: 'TXT_STAGE = :stage AND DAT_RENEWAL_EXPIRY_DATE BETWEEN :expDateFrom AND :expDateTo',
                 ExpressionAttributeValues: {
-                    ':RENEWAL_EXPIRY_DATE_FROM': expDateFrom,
-                    ':RENEWAL_EXPIRY_DATE_TO': expDateTo,
+                    ':expDateFrom': expDateFrom.toString(),
+                    ':expDateTo': expDateTo.toString(),
                     ':stage': stage
                 }
             };
-            const data = await documentClient.query(params).promise();
+            const data = await documentClient.scan(params).promise();
             if (data) return data.Items;
             return null;
         } catch (err) {
