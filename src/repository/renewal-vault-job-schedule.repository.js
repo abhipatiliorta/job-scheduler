@@ -7,15 +7,19 @@ class RenewalVaultJobScheduleRepository {
 
     constructor() { }
 
-    async UpdateJobStatus(jobId, JobStartTime, jobStatus, policyStatus) {
+    async UpdateJobStatus(updateObj) {
         try {
             const params = {
                 TableName: TABLE.RENEWAL_VAULT_JOB_SCHEDULE,
-                Key:{ "JOB_ID": jobId.toString(), JOB_START_TIME: JobStartTime.toString() },
-                AttributeValue: {
-                    "JOB_STATUS": jobStatus.toString(),
-                    "POLICY_STATUS": JSON.stringify(policyStatus)
-                }
+                Key:{ "JOB_ID": updateObj.jobId.toString() },
+                UpdateExpression: "SET JOB_STATUS = :jobStatus, ERROR_COUNT = :errCount, TXT_POLICY_LIST = :policyStatus, POLICY_COUNT= :policyCount",
+                ExpressionAttributeValues: {
+                    ":jobStatus": updateObj.jobStatus,
+                    ":errCount": updateObj.errCount,
+                    ":policyStatus": updateObj.policyStatus,
+                    ":policyCount": updateObj.policyCount
+                },
+                ReturnValues:"UPDATED_NEW"
             };
             const data = await documentClient.update(params).promise();
             return data;

@@ -13,20 +13,16 @@ class RenewalVaultHistoryRepository {
             else if (stage == "pcv") TableName = TABLE.RENEWAL_VAULT_PCV;
             else if (stage == "mcv") TableName = TABLE.RENEWAL_VAULT_MISCD;
 
-            expDateFrom = moment(expDateFrom).format("YYYY-MM-DD HH:mm:ss.0");
-            expDateTo = moment(expDateTo).format("YYYY-MM-DD HH:mm:ss.0");
-
             const params = {
                 TableName,
-                FilterExpression: 'TXT_STAGE = :stage AND DAT_RENEWAL_EXPIRY_DATE BETWEEN :expDateFrom AND :expDateTo',
+                FilterExpression: 'DAT_RENEWAL_EXPIRY_DATE >= :expDateFrom AND DAT_RENEWAL_EXPIRY_DATE <= :expDateTo',
                 ExpressionAttributeValues: {
-                    ':expDateFrom': expDateFrom.toString(),
-                    ':expDateTo': expDateTo.toString(),
-                    ':stage': stage
+                    ':expDateFrom': expDateFrom,
+                    ':expDateTo': expDateTo
                 }
             };
             const data = await documentClient.scan(params).promise();
-            if (data) return data.Items;
+            if (data && data.Items.length) return data.Items;
             return null;
         } catch (err) {
             console.log(`err ${err}`);
