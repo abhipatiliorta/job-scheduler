@@ -22,8 +22,8 @@ class RenewalVaultHistoryRepository {
                 }
             };
             const data = await documentClient.scan(params).promise();
-            if (data && data.Items.length) return data.Items;
-            return null;
+            if (data && data.Items) return data.Items;
+            return [];
         } catch (err) {
             console.log(`err ${err}`);
             throw err;

@@ -14,7 +14,7 @@ class VaultManager {
 
     async JobSchedulerProcess() {
         try {
-            const today = new Date();
+            const today = new Date().toLocaleString("en-US", {timeZone:  "Asia/Kolkata"});
 
             const JobsDetails = await this.renewalVaultJobScheduleRepository.findByJobStartDateAndTime(today);
             console.info(`Fetched Data from Renewal Vault Job Schedule Table : ${JSON.stringify(JobsDetails)}`);

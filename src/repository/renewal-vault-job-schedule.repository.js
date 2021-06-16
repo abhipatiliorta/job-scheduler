@@ -12,7 +12,7 @@ class RenewalVaultJobScheduleRepository {
             const params = {
                 TableName: TABLE.RENEWAL_VAULT_JOB_SCHEDULE,
                 Key:{ "JOB_ID": updateObj.jobId.toString() },
-                UpdateExpression: "SET JOB_STATUS = :jobStatus, ERROR_COUNT = :errCount, TXT_POLICY_LIST = :policyStatus, POLICY_COUNT= :policyCount",
+                UpdateExpression: "SET STATUS = :jobStatus, JOB_STATUS = :jobStatus, ERROR_COUNT = :errCount, TXT_POLICY_LIST = :policyStatus, POLICY_COUNT= :policyCount",
                 ExpressionAttributeValues: {
                     ":jobStatus": updateObj.jobStatus,
                     ":errCount": updateObj.errCount,
@@ -47,7 +47,7 @@ class RenewalVaultJobScheduleRepository {
 
             const data = await documentClient.scan(params).promise();
             if (data) return data.Items;
-            return null;
+            return [];
         } catch (err) {
             console.log(`err ${err}`);
             throw err;
