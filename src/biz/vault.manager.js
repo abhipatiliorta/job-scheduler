@@ -17,7 +17,6 @@ class VaultManager {
             const today = new Date();
 
             const JobsDetails = await this.renewalVaultJobScheduleRepository.findByJobStartDateAndTime(today);
-            // const JobsDetails = [{STAGE: "gcv", RENEWAL_EXPIRY_DATE_FROM: "2023-04-19", RENEWAL_EXPIRY_DATE_TO: "2023-04-21"}];
             console.info(`Fetched Data from Renewal Vault Job Schedule Table : ${JSON.stringify(JobsDetails)}`);
 
             if (JobsDetails.length) {
