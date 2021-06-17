@@ -39,11 +39,25 @@ class RenewalVaultJobScheduleRepository {
                 TableName: TABLE.RENEWAL_VAULT_JOB_SCHEDULE,
                 FilterExpression: 'JOB_START_TIME BETWEEN :timeFrom AND :timeTo AND JOB_START_DATE = :date AND attribute_not_exists(JOB_RUN_ID)',
                 ExpressionAttributeValues: {
-                    ':date': date.toString(),
-                    ':timeFrom': timeFrom.toString(),
-                    ':timeTo': timeTo.toString(),
+                    ':date': date,
+                    ':timeFrom': timeFrom,
+                    ':timeTo': timeTo,
                 }
             };
+            if(timeFrom > timeTo) {
+                params.FilterExpression = `(JOB_START_TIME BETWEEN :timeFrom1 AND :timeTo1 AND JOB_START_DATE = :date1) 
+                                        OR (JOB_START_TIME BETWEEN :timeFrom2 AND :timeTo2 AND JOB_START_DATE = :date2) 
+                                        AND attribute_not_exists(JOB_RUN_ID)`;
+
+                params.ExpressionAttributeValues = {
+                    ':date1': moment(datetime).subtract(1, 'day').format("YYYY-MM-DD"),
+                    ':timeFrom1': timeFrom,
+                    ':timeTo1': "24:00:00",
+                    ':date2': date,
+                    ':timeFrom2': "00:00:00",
+                    ':timeTo2': timeTo,
+                };
+            }
 
             const data = await documentClient.scan(params).promise();
             if (data) return data.Items;
