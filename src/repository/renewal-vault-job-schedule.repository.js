@@ -32,7 +32,7 @@ class RenewalVaultJobScheduleRepository {
         }
     }
 
-    async findByJobStartDateAndTime(datetime) {
+    async findByJobStartDateAndTime(datetime, jobId) {
         try {
             const date = moment(datetime).format("YYYY-MM-DD");
             const timeTo = moment(datetime).format("HH:mm:ss");
@@ -47,7 +47,13 @@ class RenewalVaultJobScheduleRepository {
                     ':timeTo': timeTo,
                 }
             };
-            if(timeFrom > timeTo) {
+
+            if(jobId) {
+                params.FilterExpression = `JOB_ID = :jobId`;
+                params.ExpressionAttributeValues = {
+                    ":jobId": jobId
+                };
+            } else if(timeFrom > timeTo) {
                 params.FilterExpression = `(JOB_START_TIME BETWEEN :timeFrom1 AND :timeTo1 AND JOB_START_DATE = :date1) 
                                         OR (JOB_START_TIME BETWEEN :timeFrom2 AND :timeTo2 AND JOB_START_DATE = :date2) 
                                         AND attribute_not_exists(JOB_RUN_ID)`;

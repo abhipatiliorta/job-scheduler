@@ -12,11 +12,11 @@ class VaultManager {
         this.ipdsRepository = new IPDSRepository();
     }
 
-    async JobSchedulerProcess() {
+    async JobSchedulerProcess(event) {
         try {
             const today = new Date().toLocaleString("en-US", {timeZone:  "Asia/Kolkata"});
 
-            const JobsDetails = await this.renewalVaultJobScheduleRepository.findByJobStartDateAndTime(today);
+            const JobsDetails = await this.renewalVaultJobScheduleRepository.findByJobStartDateAndTime(today, event.jobId);
             console.info(`Fetched Data from Renewal Vault Job Schedule Table : ${JSON.stringify(JobsDetails)}`);
 
             if (JobsDetails.length) {

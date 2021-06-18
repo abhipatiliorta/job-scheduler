@@ -2,10 +2,12 @@
 const VaultManager = require('../../src/biz/vault.manager');
 const Mocha = require('mocha');
 const mocha = new Mocha();
-const ccmRequest = {};
+const ccmRequest = {
+    jobId: "1624020600826"
+};
 
 mocha.run(() => {
     let vaultManager = new  VaultManager();
     let event = ccmRequest;
-    vaultManager.JobSchedulerProcess();
+    vaultManager.JobSchedulerProcess(event);
 });
