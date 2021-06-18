@@ -28,7 +28,7 @@ class VaultManager {
                     let jobStatus = "Success";
                     let errCount = 0;
                     let policyCount = 0;
-                    if (policies.length) {
+                    if (policies) {
                         for (const polIndex in policies) {
                             const policyDetail = policies[polIndex];
                             const stepInput = {
@@ -50,9 +50,6 @@ class VaultManager {
                             errCount = ipdsResponse.errCount;
                             policyCount = ipdsResponse.policyCount;
                         }
-                    } else {
-                        console.error(`No policies found for given time`);
-                        throw new NotFound(`No policies found for given time`);
                     }
 
                     const updateObj = {

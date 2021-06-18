@@ -12,7 +12,10 @@ class RenewalVaultJobScheduleRepository {
             const params = {
                 TableName: TABLE.RENEWAL_VAULT_JOB_SCHEDULE,
                 Key:{ "JOB_ID": updateObj.jobId.toString() },
-                UpdateExpression: "SET STATUS = :jobStatus, JOB_STATUS = :jobStatus, ERROR_COUNT = :errCount, TXT_POLICY_LIST = :policyStatus, POLICY_COUNT= :policyCount",
+                UpdateExpression: "SET #STATUS = :jobStatus, JOB_STATUS = :jobStatus, ERROR_COUNT = :errCount, TXT_POLICY_LIST = :policyStatus, POLICY_COUNT= :policyCount",
+                ExpressionAttributeNames: {
+                    "#STATUS": "STATUS"
+                },
                 ExpressionAttributeValues: {
                     ":jobStatus": updateObj.jobStatus,
                     ":errCount": updateObj.errCount,
