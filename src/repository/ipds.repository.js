@@ -13,6 +13,9 @@ class IPDSRepository {
             lambda.invoke(params, (err, data) => {
                 const status = {
                     TXT_POLICY_NO: policyDetail.TXT_POLICY_NO,
+                    DAT_PREVIOUSPOLICYSTARTDATE: policyDetail.DAT_PREVIOUSPOLICYSTARTDATE,
+                    DAT_PREVIOUSPOLICYENDDATE: policyDetail.DAT_PREVIOUSPOLICYENDDATE,
+                    TXT_CLIENT_NAME: policyDetail.TXT_CLIENT_NAME,
                     status: ""
                 };
                 policyCount++;
