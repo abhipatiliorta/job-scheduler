@@ -52,6 +52,11 @@ class VaultManager {
                         }
                     }
 
+                    jobDetail.TXT_POLICY_LIST = policyStatus;
+                    jobDetail.STATUS = jobStatus;
+                    jobDetail.JOB_STATUS = jobStatus;
+                    jobDetail.POLICY_COUNT = policyCount;
+                    jobDetail.ERROR_COUNT = errCount;
                     const updateObj = {
                         jobId: jobDetail.JOB_ID,
                         JobStartTime: jobDetail.JOB_START_TIME,
