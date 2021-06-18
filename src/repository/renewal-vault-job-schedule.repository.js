@@ -40,11 +40,15 @@ class RenewalVaultJobScheduleRepository {
 
             const params = {
                 TableName: TABLE.RENEWAL_VAULT_JOB_SCHEDULE,
-                FilterExpression: 'JOB_START_TIME BETWEEN :timeFrom AND :timeTo AND JOB_START_DATE = :date AND attribute_not_exists(JOB_RUN_ID)',
+                FilterExpression: 'JOB_START_TIME BETWEEN :timeFrom AND :timeTo AND JOB_START_DATE = :date AND attribute_not_exists(JOB_RUN_ID) AND #status = :submitted',
+                ExpressionAttributeNames: {
+                    "#status": "STATUS"
+                },
                 ExpressionAttributeValues: {
                     ':date': date,
                     ':timeFrom': timeFrom,
                     ':timeTo': timeTo,
+                    ":submitted": "Submitted"
                 }
             };
 
@@ -56,7 +60,11 @@ class RenewalVaultJobScheduleRepository {
             } else if(timeFrom > timeTo) {
                 params.FilterExpression = `(JOB_START_TIME BETWEEN :timeFrom1 AND :timeTo1 AND JOB_START_DATE = :date1) 
                                         OR (JOB_START_TIME BETWEEN :timeFrom2 AND :timeTo2 AND JOB_START_DATE = :date2) 
-                                        AND attribute_not_exists(JOB_RUN_ID)`;
+                                        AND attribute_not_exists(JOB_RUN_ID) AND #status = :submitted`;
+
+                params.ExpressionAttributeNames = {
+                    "#status": "STATUS"
+                };
 
                 params.ExpressionAttributeValues = {
                     ':date1': moment(datetime).subtract(1, 'day').format("YYYY-MM-DD"),
@@ -65,6 +73,7 @@ class RenewalVaultJobScheduleRepository {
                     ':date2': date,
                     ':timeFrom2': "00:00:00",
                     ':timeTo2': timeTo,
+                    ":submitted": "Submitted"
                 };
             }
 
