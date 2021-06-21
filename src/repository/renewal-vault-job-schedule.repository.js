@@ -36,7 +36,7 @@ class RenewalVaultJobScheduleRepository {
         try {
             const date = moment(datetime).format("YYYY-MM-DD");
             const timeTo = moment(datetime).format("HH:mm:ss");
-            const timeFrom = moment(datetime).subtract(3, "hours").format("HH:mm:ss");
+            const timeFrom = moment(datetime).subtract(15, "minutes").format("HH:mm:ss");
 
             const params = {
                 TableName: TABLE.RENEWAL_VAULT_JOB_SCHEDULE,
