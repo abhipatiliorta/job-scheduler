@@ -21,7 +21,16 @@ class RenewalVaultHistoryRepository {
                     ':expDateTo': expDateTo
                 }
             };
-            const data = await documentClient.scan(params).promise();
+            // let data = await documentClient.scan(params).promise();
+            let scanResults = [];
+            let items;
+            do{
+                items =  await documentClient.scan(params).promise();
+                items.Items.forEach((item) => scanResults.push(item));
+                params.ExclusiveStartKey  = items.LastEvaluatedKey;
+            }while(typeof items.LastEvaluatedKey !== "undefined");
+
+            console.log(scanResults);
             if (data && data.Items) return data.Items;
             return [];
         } catch (err) {
