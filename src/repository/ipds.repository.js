@@ -25,10 +25,17 @@ class IPDSRepository {
                     jobStatus = "Failed";
                     status.status = "Failed";
                     status.message = err.message;
-                    reject(err);
                 } else {
                     console.info(`IPDS response : ${JSON.stringify(data.Payload)}`);
-                    status.status = "Success";
+                    const payload = JSON.parse(data.Payload);
+                    if(payload.errorMessage || payload.errorType) {
+                        errCount++;
+                        jobStatus = "Failed";
+                        status.status = "Failed";
+                        status.message = payload.errorMessage;
+                    } else {
+                        status.status = "Success";
+                    }
                 }
                 resolve({ status, jobStatus, errCount, policyCount });
             });

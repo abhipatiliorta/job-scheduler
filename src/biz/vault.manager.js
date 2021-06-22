@@ -14,7 +14,7 @@ class VaultManager {
 
     async JobSchedulerProcess(event) {
         try {
-            const today = new Date().toLocaleString("en-US", {timeZone:  "Asia/Kolkata"});
+            const today = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
 
             const JobsDetails = await this.renewalVaultJobScheduleRepository.findByJobStartDateAndTime(today, event.jobId);
             console.info(`Fetched Data from Renewal Vault Job Schedule Table : ${JSON.stringify(JobsDetails)}`);
@@ -23,7 +23,7 @@ class VaultManager {
                 for (const index in JobsDetails) {
                     const jobDetail = JobsDetails[index];
                     let policies = await this.renewalVaultHistoryRepository.findPoliciesByExpiryDate(jobDetail.STAGE, jobDetail.RENEWAL_EXPIRY_DATE_FROM, jobDetail.RENEWAL_EXPIRY_DATE_TO);
-                    console.info(`Fetched Data from Renewal Vault Job Schedule Table : ${JSON.stringify(JobsDetails)}`);
+                    console.info(`Fetched Data from Renewal Vault Job Table: ${JSON.stringify(policies)}`);
                     const policyStatus = [];
                     let jobStatus = "Success";
                     let errCount = 0;

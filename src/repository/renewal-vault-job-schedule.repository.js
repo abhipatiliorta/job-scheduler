@@ -54,6 +54,7 @@ class RenewalVaultJobScheduleRepository {
 
             if(jobId) {
                 params.FilterExpression = `JOB_ID = :jobId`;
+                delete params.ExpressionAttributeNames;
                 params.ExpressionAttributeValues = {
                     ":jobId": jobId
                 };
