@@ -22,17 +22,15 @@ class RenewalVaultHistoryRepository {
                 }
             };
             // let data = await documentClient.scan(params).promise();
-            let scanResults = [];
-            let items;
-            do{
-                items =  await documentClient.scan(params).promise();
-                items.Items.forEach((item) => scanResults.push(item));
-                params.ExclusiveStartKey  = items.LastEvaluatedKey;
-            }while(typeof items.LastEvaluatedKey !== "undefined");
+            const scanResults = [];
+            let data;
+            do {
+                data = await documentClient.scan(params).promise();
+                if (data && data.Items) scanResults.push(...data.Items);
+                params.ExclusiveStartKey = data.LastEvaluatedKey;
+            } while (data.LastEvaluatedKey);
 
-            console.log(scanResults);
-            if (data && data.Items) return data.Items;
-            return [];
+            return scanResults;
         } catch (err) {
             console.log(`err ${err}`);
             throw err;
