@@ -9,6 +9,8 @@ class RenewalVaultJobScheduleRepository {
 
     async UpdateJobStatus(updateObj) {
         try {
+            
+            console.log(`Job Schedule update details ${JSON.stringify(updateObj)}`);
             const params = {
                 TableName: TABLE.RENEWAL_VAULT_JOB_SCHEDULE,
                 Key:{ "JOB_ID": updateObj.jobId.toString() },
@@ -24,9 +26,24 @@ class RenewalVaultJobScheduleRepository {
                 },
                 ReturnValues:"UPDATED_NEW"
             };
+            // require('fs').writeFileSync('poil.json', JSON.stringify(params), 'utf8');
             const data = await documentClient.update(params).promise();
             return data;
+        } catch (err) {
+            throw err;
+        }
+    }
 
+    async insertJobStatus(insertObj) {
+        try {
+            console.log(`Job Schedule details ${JSON.stringify(insertObj)}`);
+            const params = {
+                TableName: "renewal_vault_job_schedule",
+                Item: insertObj
+            };
+            const data = await documentClient.put(params).promise();
+            console.log('Insert job Schedule response: ', data);
+            return data || null;
         } catch (err) {
             throw err;
         }
@@ -34,9 +51,15 @@ class RenewalVaultJobScheduleRepository {
 
     async findByJobStartDateAndTime(datetime, jobId) {
         try {
+            // datetime = new Date("2021-06-15 23:02:02");
+
             const date = moment(datetime).format("YYYY-MM-DD");
             const timeTo = moment(datetime).format("HH:mm:ss");
             const timeFrom = moment(datetime).subtract(15, "minutes").format("HH:mm:ss");
+
+            console.log("date", date);
+            console.log("timeTo", timeTo);
+            console.log("timeFrom", timeFrom);
 
             const params = {
                 TableName: TABLE.RENEWAL_VAULT_JOB_SCHEDULE,
