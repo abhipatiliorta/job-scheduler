@@ -30,3 +30,26 @@ Resources:
               - dynamodb:BatchGetItem
               - dynamodb:DescribeTable
             Resource: '*'
+
+  ReportUploadToS3Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/app.s3lambdaHandler
+      Runtime: nodejs14.x
+      MemorySize: 128
+      Timeout: 100
+      Description: A Lambda function that returns a static string.
+      Policies:
+        # - AWSLambdaBasicExecutionRole
+        - Statement:
+            Effect: Allow
+            Action:
+              - dynamodb:PutItem
+              - dynamodb:UpdateItem
+              - dynamodb:BatchWriteItem
+              - dynamodb:GetItem
+              - dynamodb:Scan
+              - dynamodb:Query
+              - dynamodb:BatchGetItem
+              - dynamodb:DescribeTable
+            Resource: '*'

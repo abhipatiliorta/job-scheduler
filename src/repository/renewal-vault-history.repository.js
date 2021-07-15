@@ -36,6 +36,76 @@ class RenewalVaultHistoryRepository {
             throw err;
         }
     }
+
+    async policyFromHistoryTable(stage, policy) {
+        try {
+            let tableName;
+            if(stage == "gcv") tableName = TABLE.RENEWAL_VAULT_GCV_HISTORY;
+            else if(stage == "pcv") tableName = TABLE.RENEWAL_VAULT_PCV_HISTORY;
+            else if(stage == "mcv") tableName = TABLE.RENEWAL_VAULT_MISCD_HISTORY;
+
+            const params = {
+                TableName: tableName,
+                FilterExpression: 'TXT_POLICY_NO = :policyNo AND DAT_RENEWAL_EXPIRY_DATE = :expDate AND NUM_REVISION > :rev',
+                ExpressionAttributeValues: {
+                    ':policyNo': policy.TXT_POLICY_NO,
+                    ':expDate': policy.DAT_RENEWAL_EXPIRY_DATE,
+                    ':rev': 0
+                }
+            };
+
+            let data;
+            let scanResults = [];
+            do {
+                data = await documentClient.scan(params).promise();
+                if (data && data.Items) {
+                    for (const index in data.Items) {
+                        if(!scanResults.length) scanResults = [data.Items[index]];
+                        else if(data.Items[0] && data.Items[index].NUM_REVISION > scanResults[0].NUM_REVISION)
+                            scanResults = [data.Items[index]];
+                    }
+                }
+                params.ExclusiveStartKey = data.LastEvaluatedKey;
+            } while (data.LastEvaluatedKey);
+
+            return scanResults;
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    async policyHistoryByJobid(jobId, stage) {
+        try {
+            let tableName;
+            if(stage == "gcv") tableName = TABLE.RENEWAL_VAULT_GCV_HISTORY;
+            else if(stage == "pcv") tableName = TABLE.RENEWAL_VAULT_PCV_HISTORY;
+            else if(stage == "mcv") tableName = TABLE.RENEWAL_VAULT_MISCD_HISTORY;
+
+            const params = {
+                TableName: tableName,
+                IndexName: 'JOB_ID',
+                KeyConditionExpression: 'JOB_ID = :jobId',
+                FilterExpression: 'TXT_POLICY_NO <> :policyNo AND NUM_REVISION > :rev',
+                ExpressionAttributeValues: {
+                    ':policyNo': null,
+                    ':jobId': jobId,
+                    ':rev': 0
+                }
+            };
+
+            let data;
+            let scanResults = [];
+            do {
+                data = await documentClient.query(params).promise();
+                if (data && data.Items) scanResults.push(...data.Items);
+                params.ExclusiveStartKey = data.LastEvaluatedKey;
+            } while (data.LastEvaluatedKey);
+
+            return scanResults;
+        } catch (err) {
+            throw err;
+        }
+    }
 }
 
 module.exports = RenewalVaultHistoryRepository;
