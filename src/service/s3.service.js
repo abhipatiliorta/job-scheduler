@@ -16,7 +16,7 @@ class S3Service {
                 Body: body,
                 ContentType: contentType
             };
-            console.info(`File Upload Params - ${params}`);
+            console.info(`File Upload Params - ${JSON.stringify(params)}`);
             S3.putObject(params, (err, data) => {
                 if (err) {
                     reject(err);

@@ -14,10 +14,13 @@ exports.lambdaHandler = async (event, context) => {
 
 exports.s3lambdaHandler = async (event, context) => {
     try {
+        console.info('Event: ', event);
         let s3UploaderManager = new S3UploaderManager();
         let result = await s3UploaderManager.uploadToS3Process(event, context);
+        console.info('S3 response result: ', result);
         return result;
     } catch (err) {
+        console.error('S3 response error: ', err);
         throw err;
     }
 };

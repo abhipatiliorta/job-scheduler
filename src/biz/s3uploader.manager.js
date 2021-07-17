@@ -14,17 +14,27 @@ class S3UploaderManager {
 
     async uploadToS3Process(event) {
         try {
+            console.log(`S3 request: ${JSON.stringify(event)}`);
             const policyDeatils = [];
             const jobId = event.jobId;
             const jobData = event.jobData;
             const lobName = jobData.STAGE == "gcv" ? 'MotorCommercialGCV' : jobData.STAGE == "pcv" ? 'MotorCommercialPCV' : jobData.STAGE == "mcv" ? 'MotorCommercialMCV' : null;
             const fileName = `${jobId}-${lobName}.csv`;
 
-            const policy = await this.renewalVaultHistoryRepository.policyFromHistoryTable(jobId, jobData);
-            for (const index in policy) {
-                const encodedPolicy = await this.jobPolicyDto.encodePolicy(policy[index]);
+            const policyList = jobData.TXT_POLICY_LIST;
+            for (const index in policyList) {
+                const policy = await this.renewalVaultHistoryRepository.policyFromHistoryTable(jobData.STAGE, policyList[index]);
+                console.info(`Policy: ${JSON.stringify(policy)}`)
+                const encodedPolicy = await this.jobPolicyDto.encodePolicy(policy[0]);
                 policyDeatils.push(encodedPolicy);
             }
+
+            // const policy = await this.renewalVaultHistoryRepository.policyHistoryByJobid(jobId, jobData.STAGE);
+            // console.info(`Policy List: ${JSON.stringify(policy)}`)
+            // for (const index in policy) {
+            //     const encodedPolicy = await this.jobPolicyDto.encodePolicy(policy[index]);
+            //     policyDeatils.push(encodedPolicy);
+            // }
 
             console.info(`Policy List: ${JSON.stringify(policyDeatils)}`, jobId);
             let fileContent = CSV.toCSV(policyDeatils, {
@@ -35,13 +45,13 @@ class S3UploaderManager {
             console.info('Uploading file to S3 ', jobId);
             console.info(`CSV File fileContent - ${fileContent}`, jobId);
 
-            await this.s3Service.upload(
-                BUCKET,
+            const uploadRes = await this.s3Service.upload(
+                process.env.BUCKET,
                 fileName,
                 new Buffer.from(fileContent, 'utf8'),
                 HEADER.CSV
             );
-            return policyDeatils;
+            return uploadRes;
         } catch (error) {
             throw error;
         }

@@ -2,7 +2,6 @@ const moment = require('moment');
 
 class JobPolicyDto {
   encodePolicy(policyObj) {
-    const ipdsResult = JSON.parse(policyObj.IPDS_RESULT);
     let resPolicyObj = {
       "Policy number": policyObj.TXT_POLICY_NO,
       "Expiry date": moment(policyObj.DAT_RENEWAL_EXPIRY_DATE).format('YYYY-MM-DD'),
@@ -154,11 +153,6 @@ class JobPolicyDto {
       "NUM_PREVIOUS_TOTAL_IDV": policyObj.NUM_PREVIOUS_TOTAL_IDV,
       "NUM_PREVIOUSYEARNCB": policyObj.NUM_PREVIOUSYEARNCB,
 
-      "UGST/SGST": ipdsResult.TotalPremium.ugstsgst, // "you will get it from GST service",
-      "CGST": ipdsResult.TotalPremium.cgst, // "you will get it from GST service",
-      "IGST": ipdsResult.TotalPremium.igst, // "you will get it from GST service",
-      "Kerala Cess": ipdsResult.TotalPremium.keralaCess, // "you will get it from GST service",
-
       "Fleet Policy reference no": null,
       "Fleet Policy Rate": null,
       "Fleet COA %": null,
@@ -285,6 +279,15 @@ class JobPolicyDto {
       "Renewal extract Status Flag": null,
       "Flag Description_Error": null,
     };
+
+    if(policyObj && policyObj.IPDS_RESULT) {
+      const ipdsResult = JSON.parse(policyObj.IPDS_RESULT);
+      
+      resPolicyObj["UGST/SGST"] = ipdsResult.TotalPremium.ugstsgst; // "you will get it from GST service";
+      resPolicyObj["CGST"] = ipdsResult.TotalPremium.cgst; // "you will get it from GST service";
+      resPolicyObj["IGST"] = ipdsResult.TotalPremium.igst; // "you will get it from GST service";
+      resPolicyObj["Kerala Cess"] = ipdsResult.TotalPremium.keralaCess; // "you will get it from GST service";
+    }
 
     return resPolicyObj;
   }
