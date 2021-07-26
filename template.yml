@@ -58,3 +58,59 @@ Resources:
               - dynamodb:BatchGetItem
               - dynamodb:DescribeTable
             Resource: '*'
+
+  BatchUpdateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/app.batchUpdateHandler
+      Runtime: nodejs14.x
+      MemorySize: 128
+      Timeout: 100
+      Description: A Lambda function that returns a static string.
+      Environment:
+        Variables:
+          REGION: ap-south-1
+          BUCKET: !ImportValue s3-stack-RenewalVaultDocsBucketName
+          FILELOCATION: https://397611673480-renewal-vault-docs.s3.ap-south-1.amazonaws.com
+      Policies:
+        # - AWSLambdaBasicExecutionRole
+        - Statement:
+            Effect: Allow
+            Action:
+              - dynamodb:PutItem
+              - dynamodb:UpdateItem
+              - dynamodb:BatchWriteItem
+              - dynamodb:GetItem
+              - dynamodb:Scan
+              - dynamodb:Query
+              - dynamodb:BatchGetItem
+              - dynamodb:DescribeTable
+            Resource: '*'
+
+  TriggerCCMFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/app.triggerCCMHandler
+      Runtime: nodejs14.x
+      MemorySize: 128
+      Timeout: 100
+      Description: A Lambda function that returns a static string.
+      Environment:
+        Variables:
+          REGION: ap-south-1
+          BUCKET: !ImportValue s3-stack-RenewalVaultDocsBucketName
+          FILELOCATION: https://397611673480-renewal-vault-docs.s3.ap-south-1.amazonaws.com
+      Policies:
+        # - AWSLambdaBasicExecutionRole
+        - Statement:
+            Effect: Allow
+            Action:
+              - dynamodb:PutItem
+              - dynamodb:UpdateItem
+              - dynamodb:BatchWriteItem
+              - dynamodb:GetItem
+              - dynamodb:Scan
+              - dynamodb:Query
+              - dynamodb:BatchGetItem
+              - dynamodb:DescribeTable
+            Resource: '*'

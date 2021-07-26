@@ -36,6 +36,7 @@ class IPDSRepository {
                         status.message = payload.errorMessage;
                     } else {
                         status.status = "Success";
+                        status.message = null;
                     }
                 }
                 resolve({ status, jobStatus, errCount, policyCount });

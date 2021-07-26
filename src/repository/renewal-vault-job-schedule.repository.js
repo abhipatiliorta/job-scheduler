@@ -7,6 +7,32 @@ class RenewalVaultJobScheduleRepository {
 
     constructor() { }
 
+    async searchWithJobId(jobId, stage = null) {
+        try {
+            const params = {
+                TableName: TABLE.RENEWAL_VAULT_JOB_SCHEDULE,
+                FilterExpression: 'begins_with(JOB_ID, :jobId)',
+                ExpressionAttributeValues: {
+                    ":jobId": jobId.toString()
+                }
+            };
+
+            if(stage) {
+                params.FilterExpression += ' AND STAGE = :stage';
+                params.ExpressionAttributeValues[':stage'] = stage
+            }
+            const data = await documentClient.scan(params).promise();
+            if (data) {
+                const { Items } = data;
+                return { Items };
+            }
+            return null;
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
+    }
+
     async UpdateJobStatus(updateObj) {
         try {
             
@@ -26,7 +52,34 @@ class RenewalVaultJobScheduleRepository {
                 },
                 ReturnValues:"UPDATED_NEW"
             };
+
+            if(updateObj.updatedAt) {
+                params.UpdateExpression += ', UPDATED_AT = :updatedAt '
+                params.ExpressionAttributeValues[':updatedAt'] = updateObj.updatedAt;
+            }
             // require('fs').writeFileSync('poil.json', JSON.stringify(params), 'utf8');
+            const data = await documentClient.update(params).promise();
+            return data;
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    async UpdateCCMStatus(updateObj) {
+        try {
+            
+            console.log(`Job Schedule update details ${JSON.stringify(updateObj)}`);
+            const params = {
+                TableName: tableName,
+                Key:{ "JOB_ID": updateObj.jobId.toString() },
+                UpdateExpression: "SET CCM_JOB_STATUS = :ccmJobStatus, CCM_ERROR_COUNT = :ccmErrCount, TXT_POLICY_LIST = :policyDeatils",
+                ExpressionAttributeValues: {
+                    ":ccmJobStatus": updateObj.ccmJobStatus,
+                    ":policyDeatils": updateObj.policyDeatils,
+                    ":ccmErrCount": updateObj.ccmErrCount
+                },
+                ReturnValues:"UPDATED_NEW"
+            };
             const data = await documentClient.update(params).promise();
             return data;
         } catch (err) {
