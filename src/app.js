@@ -3,6 +3,7 @@ const VaultManager = require('./biz/vault.manager');
 const S3UploaderManager = require('./biz/s3uploader.manager');
 const BatchUpdateProcess = require('./biz/batch-update.manager');
 const TriggerCCMManager = require('./biz/trigger-ccm.manager');
+const PolicyModificationApprovalManager = require('./biz/policy-modification-approval.manager');
 
 exports.lambdaHandler = async (event, context) => {
     try {
@@ -45,6 +46,19 @@ exports.triggerCCMHandler = async (event, context) => {
         console.info('Event: ', event);
         let triggerCCMManager = new TriggerCCMManager();
         let result = await triggerCCMManager.tiggerCCM(event, context);
+        console.info('S3 response result: ', result);
+        return result;
+    } catch (err) {
+        console.error('S3 response error: ', err);
+        throw err;
+    }
+};
+
+exports.policyModificationApprovalHandler = async (event, context) => {
+    try {
+        console.info('Event: ', event);
+        let policyModificationApprovalManager = new PolicyModificationApprovalManager();
+        let result = await policyModificationApprovalManager.policyApproval(event, context);
         console.info('S3 response result: ', result);
         return result;
     } catch (err) {

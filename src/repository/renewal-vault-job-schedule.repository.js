@@ -5,7 +5,7 @@ const moment = require("moment");
 const CONTEXT = 'RenewalVaultJobScheduleRepository';
 class RenewalVaultJobScheduleRepository {
 
-    constructor() { }
+    constructor() {}
 
     async searchWithJobId(jobId, stage = null) {
         try {
@@ -17,7 +17,7 @@ class RenewalVaultJobScheduleRepository {
                 }
             };
 
-            if(stage) {
+            if (stage) {
                 params.FilterExpression += ' AND STAGE = :stage';
                 params.ExpressionAttributeValues[':stage'] = stage
             }
@@ -35,11 +35,12 @@ class RenewalVaultJobScheduleRepository {
 
     async UpdateJobStatus(updateObj) {
         try {
-            
             console.log(`Job Schedule update details ${JSON.stringify(updateObj)}`);
             const params = {
                 TableName: TABLE.RENEWAL_VAULT_JOB_SCHEDULE,
-                Key:{ "JOB_ID": updateObj.jobId.toString() },
+                Key: {
+                    "JOB_ID": updateObj.jobId.toString()
+                },
                 UpdateExpression: "SET #STATUS = :jobStatus, JOB_STATUS = :jobStatus, ERROR_COUNT = :errCount, TXT_POLICY_LIST = :policyStatus, POLICY_COUNT= :policyCount",
                 ExpressionAttributeNames: {
                     "#STATUS": "STATUS"
@@ -50,10 +51,10 @@ class RenewalVaultJobScheduleRepository {
                     ":policyStatus": updateObj.policyStatus,
                     ":policyCount": updateObj.policyCount
                 },
-                ReturnValues:"UPDATED_NEW"
+                ReturnValues: "UPDATED_NEW"
             };
 
-            if(updateObj.updatedAt) {
+            if (updateObj.updatedAt) {
                 params.UpdateExpression += ', UPDATED_AT = :updatedAt '
                 params.ExpressionAttributeValues[':updatedAt'] = updateObj.updatedAt;
             }
@@ -67,18 +68,45 @@ class RenewalVaultJobScheduleRepository {
 
     async UpdateCCMStatus(updateObj) {
         try {
-            
             console.log(`Job Schedule update details ${JSON.stringify(updateObj)}`);
             const params = {
-                TableName: tableName,
-                Key:{ "JOB_ID": updateObj.jobId.toString() },
+                TableName: TABLE.RENEWAL_VAULT_JOB_SCHEDULE,
+                Key: {
+                    "JOB_ID": updateObj.jobId.toString()
+                },
                 UpdateExpression: "SET CCM_JOB_STATUS = :ccmJobStatus, CCM_ERROR_COUNT = :ccmErrCount, TXT_POLICY_LIST = :policyDeatils",
                 ExpressionAttributeValues: {
                     ":ccmJobStatus": updateObj.ccmJobStatus,
                     ":policyDeatils": updateObj.policyDeatils,
                     ":ccmErrCount": updateObj.ccmErrCount
                 },
-                ReturnValues:"UPDATED_NEW"
+                ReturnValues: "UPDATED_NEW"
+            };
+            const data = await documentClient.update(params).promise();
+            return data;
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    async UpdateBatchStatusAfterModification(updateObj) {
+        try {
+            console.log(`Job Schedule update details ${JSON.stringify(updateObj)}`);
+            const params = {
+                TableName: TABLE.RENEWAL_VAULT_JOB_SCHEDULE,
+                Key: {
+                    "JOB_ID": updateObj.jobId.toString()
+                },
+                UpdateExpression: "SET CCM_JOB_STATUS = :ccmJobStatus, JOB_STATUS = :ccmJobStatus, #STATUS = :ccmJobStatus, ERROR_COUNT = :ccmErrCount, CCM_ERROR_COUNT = :ccmErrCount, TXT_POLICY_LIST = :policyDeatils",
+                ExpressionAttributeNames: {
+                    "#STATUS": "STATUS"
+                },
+                ExpressionAttributeValues: {
+                    ":ccmJobStatus": updateObj.ccmJobStatus,
+                    ":policyDeatils": updateObj.policyDeatils,
+                    ":ccmErrCount": updateObj.ccmErrCount
+                },
+                ReturnValues: "UPDATED_NEW"
             };
             const data = await documentClient.update(params).promise();
             return data;
@@ -128,13 +156,13 @@ class RenewalVaultJobScheduleRepository {
                 }
             };
 
-            if(jobId) {
+            if (jobId) {
                 params.FilterExpression = `JOB_ID = :jobId`;
                 delete params.ExpressionAttributeNames;
                 params.ExpressionAttributeValues = {
                     ":jobId": jobId
                 };
-            } else if(timeFrom > timeTo) {
+            } else if (timeFrom > timeTo) {
                 params.FilterExpression = `(JOB_START_TIME BETWEEN :timeFrom1 AND :timeTo1 AND JOB_START_DATE = :date1) 
                                         OR (JOB_START_TIME BETWEEN :timeFrom2 AND :timeTo2 AND JOB_START_DATE = :date2) 
                                         AND attribute_not_exists(JOB_RUN_ID) AND #status = :submitted`;
