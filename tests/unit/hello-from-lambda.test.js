@@ -4,7 +4,6 @@ const Mocha = require('mocha');
 const mocha = new Mocha();
 const ccmRequest = {
     "approvedBy": "maker",
-    "batchId": "1626429097",
     "updatePlicyArray": [{
         "policyNo": "3412000169",
         "status": "Approve"

@@ -3,10 +3,14 @@ const {
     RenewalVaultJobScheduleRepository,
     RenewalExtractRepository
 } = require("../repository");
+// const VaultManager = require("../biz/vault.manager");
+// const TriggerCCMManager = require("../biz/trigger-ccm.manager");
 const { NotFound } = require("../exception");
 
 class PolicyModificationApprovalManager {
     constructor() {
+        // this.vaultManager = new VaultManager();
+        // this.triggerCCMManager = new TriggerCCMManager();
         this.renewalVaultJobScheduleRepository = new RenewalVaultJobScheduleRepository();
         this.renewalExtractRepository = new RenewalExtractRepository();
         this.ccmRepository = new CCMRepository();
@@ -53,6 +57,7 @@ class PolicyModificationApprovalManager {
                             "STAGE": policyObj.TXT_STAGE == "gcv" ? 'GCV' : policyObj.TXT_STAGE == "pcv" ? 'PCV' : policyObj.TXT_STAGE == "mcv" ? 'MSCID' : null
                         };
                         const ccmResponse = await this.ccmRepository.pullCCM({}, stepInput, policyObj.TXT_POLICY_NO, 'Success', 0);
+                        console.info('Step function response: ', JSON.stringify(ccmResponse));
                     }
 
                     const updatedPolicy = await this.renewalExtractRepository.updateModificationStatus(policyNo, policyObj.NUM_REVISION, status, declineReason, approvedBy);
