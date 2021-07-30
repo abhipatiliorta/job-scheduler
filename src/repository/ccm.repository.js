@@ -7,6 +7,7 @@ class CCMRepository {
     }
 
     async pullCCM(policyStatus, policy, TXT_POLICY_NO, ccmStatus, ccmErrCount) {
+        console.info(`Step Input: `, JSON.stringify(policy), TXT_POLICY_NO);
         const promise = new Promise(async (resolve, reject) => {
             try {
                 const ccmResponse = await this.stepService.executeStepFunctiom(policy, TXT_POLICY_NO);

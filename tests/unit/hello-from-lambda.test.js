@@ -1,15 +1,18 @@
 'use strict';
-// const VaultManager = require('../../src/biz/vault.manager');
-const VaultManager = require('../../src/biz/s3uploader.manager');
+const VaultManager = require('../../src/biz/policy-modification-approval.manager');
 const Mocha = require('mocha');
 const mocha = new Mocha();
 const ccmRequest = {
-    "jobId": "1626154075",
-    "jobData": {"STAGE": "gcv"}
+    "approvedBy": "maker",
+    "batchId": "1626429097",
+    "updatePlicyArray": [{
+        "policyNo": "3412000169",
+        "status": "Approve"
+    }]
 };
 
 mocha.run(() => {
     let vaultManager = new  VaultManager();
     let event = ccmRequest;
-    vaultManager.uploadToS3Process(event);
+    vaultManager.policyApproval(event);
 });

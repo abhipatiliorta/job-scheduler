@@ -6,7 +6,7 @@ class RenewalExtractRepository {
 
     constructor() {}
 
-    async getModifiedPolicy(policyNo, stage) {
+    async getModifiedPolicy(policyNo) {
         try {
             const params = {
                 TableName: TABLE.RENEWAL_EXTRACT_MODIFICATION,
@@ -35,7 +35,6 @@ class RenewalExtractRepository {
     async updateModificationStatus(policyNo, numRev, status, declineReason, approvedBy) {
         try {
 
-            console.log(`Job Schedule update details ${JSON.stringify(updateObj)}`);
             const params = {
                 TableName: TABLE.RENEWAL_EXTRACT_MODIFICATION,
                 Key: {
@@ -46,7 +45,7 @@ class RenewalExtractRepository {
                 ExpressionAttributeValues: {
                     ":numRev": numRev,
                     ":status": status,
-                    ":declineReason": declineReason,
+                    ":declineReason": declineReason || null,
                     ":approvalDate": new Date().toString(),
                     ":approvedBy": approvedBy,
                 },
@@ -59,29 +58,56 @@ class RenewalExtractRepository {
         }
     }
 
-    async updatePolicyData(policyNo, stage, updateObj) {
+    async updatePolicyData(stage, updateObj) {
         try {
             let tableName;
             if (stage == "gcv") tableName = TABLE.RENEWAL_VAULT_GCV;
             else if (stage == "pcv") tableName = TABLE.RENEWAL_VAULT_PCV;
             else if (stage == "miscd") tableName = TABLE.RENEWAL_VAULT_MISCD;
 
-            console.log(`Job Schedule update details ${JSON.stringify(updateObj)}`);
+            console.log(`Update policy approval status details ${JSON.stringify(updateObj)}`);
             const params = {
                 TableName: tableName,
                 Key: {
-                    "TXT_POLICY_NO": policyNo.toString()
+                    "TXT_POLICY_NO": updateObj.TXT_POLICY_NO,
+                    "DAT_RENEWAL_EXPIRY_DATE": updateObj.DAT_RENEWAL_EXPIRY_DATE,
                 },
-                UpdateExpression: "SET APPROVAL_STATUS = :status, DECLINE_REASON = :declineReason, APPROVAL_DATE = :approvalDate, APPROVED_BY = :approvedBy",
+                UpdateExpression: "SET TXT_PRODUCER_CD = :TXT_PRODUCER_CD",
                 ExpressionAttributeValues: {
-                    ":numRev": numRev,
-                    ":status": status,
-                    ":declineReason": declineReason,
-                    ":approvalDate": new Date().toString(),
-                    ":approvedBy": approvedBy,
+                    ':TXT_PRODUCER_CD': updateObj.TXT_PRODUCER_CD
                 },
                 ReturnValues: "UPDATED_NEW"
             };
+
+            if (updateObj.TXT_PRODUCER_NAME) { 
+                params.UpdateExpression += `, TXT_PRODUCER_NAME = :TXT_PRODUCER_NAME `;
+                params.ExpressionAttributeValues[':TXT_PRODUCER_NAME'] = updateObj.TXT_PRODUCER_NAME;
+            }
+            if (updateObj.TXT_SUB_PRODUCER_CD) { 
+                params.UpdateExpression += `, TXT_SUB_PRODUCER_CD = :TXT_SUB_PRODUCER_CD `;
+                params.ExpressionAttributeValues[':TXT_SUB_PRODUCER_CD'] = updateObj.TXT_SUB_PRODUCER_CD;
+            }
+            if (updateObj.TXT_SUB_PRODUCER_NAME) { 
+                params.UpdateExpression += `, TXT_SUB_PRODUCER_NAME = :TXT_SUB_PRODUCER_NAME `;
+                params.ExpressionAttributeValues[':TXT_SUB_PRODUCER_NAME'] = updateObj.TXT_SUB_PRODUCER_NAME;
+            }
+            if (updateObj.TXT_PRODUCER_TYPE) { 
+                params.UpdateExpression += `, TXT_PRODUCER_TYPE = :TXT_PRODUCER_TYPE `;
+                params.ExpressionAttributeValues[':TXT_PRODUCER_TYPE'] = updateObj.TXT_PRODUCER_TYPE;
+            }
+            if (updateObj.TXT_DEALER_CODE) { 
+                params.UpdateExpression += `, TXT_DEALER_CODE = :TXT_DEALER_CODE `;
+                params.ExpressionAttributeValues[':TXT_DEALER_CODE'] = updateObj.TXT_DEALER_CODE;
+            }
+            if (updateObj.TXT_OFFICE_LOCATION_CODE) { 
+                params.UpdateExpression += `, TXT_OFFICE_LOCATION_CODE = :TXT_OFFICE_LOCATION_CODE `;
+                params.ExpressionAttributeValues[':TXT_OFFICE_LOCATION_CODE'] = updateObj.TXT_OFFICE_LOCATION_CODE;
+            }
+            if (updateObj.TXT_OFFICE_LOCATION_NAME) { 
+                params.UpdateExpression += `, TXT_OFFICE_LOCATION_NAME = :TXT_OFFICE_LOCATION_NAME `;
+                params.ExpressionAttributeValues[':TXT_OFFICE_LOCATION_NAME'] = updateObj.TXT_OFFICE_LOCATION_NAME;
+            }
+
             const data = await documentClient.update(params).promise();
             return data;
         } catch (err) {
