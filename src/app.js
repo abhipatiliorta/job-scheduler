@@ -33,10 +33,10 @@ exports.batchUpdateHandler = async (event, context) => {
         console.info('Event: ', event);
         let batchUpdateProcess = new BatchUpdateProcess();
         let result = await batchUpdateProcess.BatchUpdateProcess(event, context);
-        console.info('S3 response result: ', result);
+        console.info('Batch update result: ', result);
         return result;
     } catch (err) {
-        console.error('S3 response error: ', err);
+        console.error('Batch update error: ', err);
         throw err;
     }
 };
@@ -46,10 +46,10 @@ exports.triggerCCMHandler = async (event, context) => {
         console.info('Event: ', event);
         let triggerCCMManager = new TriggerCCMManager();
         let result = await triggerCCMManager.tiggerCCM(event, context);
-        console.info('S3 response result: ', result);
+        console.info('Trigger CCM result: ', result);
         return result;
     } catch (err) {
-        console.error('S3 response error: ', err);
+        console.error('Trigger CCM error: ', err);
         throw err;
     }
 };
@@ -59,10 +59,10 @@ exports.policyModificationApprovalHandler = async (event, context) => {
         console.info('Event: ', event);
         let policyModificationApprovalManager = new PolicyModificationApprovalManager();
         let result = await policyModificationApprovalManager.policyApproval(event, context);
-        console.info('S3 response result: ', result);
+        console.info('Policy modification result: ', result);
         return result;
     } catch (err) {
-        console.error('S3 response error: ', err);
+        console.error('Policy modification error: ', err);
         throw err;
     }
 };

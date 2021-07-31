@@ -28,9 +28,9 @@ class PolicyModificationApprovalManager {
                 const declineReason = updatePlicyArray[polIndex].declineReason;
 
                 const policyObj = await this.renewalExtractRepository.getModifiedPolicy(policyNo);
-                console.info('Policy Details: ', policyObj);
+                console.info('Modified Policy Details: ', policyObj);
                 if (!policyObj) {
-                    console.error(`Policy details not found for policy number: ${policyNo}.`);
+                    console.error(`Policy details not found in modification extract for policy number: ${policyNo}.`);
                     // throw new NotFound(`Policy details not found for policy number: ${policyNo}.`);
                 } else {
                     if (status == 'Approve') {
