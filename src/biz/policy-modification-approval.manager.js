@@ -19,6 +19,7 @@ class PolicyModificationApprovalManager {
     async policyApproval(event) {
         try {
             console.log('request body: ', event);
+            const flag = event.flag;
             const approvedBy = event.approvedBy;
             const updatePlicyArray = event.updatePlicyArray;
 
@@ -47,7 +48,7 @@ class PolicyModificationApprovalManager {
                             TXT_OFFICE_LOCATION_NAME: policyObj.TXT_OFFICE_LOCATION_NAME,
                         };
 
-                        const updatePolicy = await this.renewalExtractRepository.updatePolicyData(policyObj.TXT_STAGE, updatePolicyObj);
+                        const updatePolicy = await this.renewalExtractRepository.updatePolicyData(policyObj.TXT_STAGE, updatePolicyObj, flag);
                         console.info(`Updated policy data as : ${JSON.stringify(updatePolicy)}`);
 
                         const stepInput = {

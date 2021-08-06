@@ -58,7 +58,7 @@ class RenewalExtractRepository {
         }
     }
 
-    async updatePolicyData(stage, updateObj) {
+    async updatePolicyData(stage, updateObj, flag) {
         try {
             let tableName;
             if (stage == "gcv") tableName = TABLE.RENEWAL_VAULT_GCV;
@@ -72,8 +72,12 @@ class RenewalExtractRepository {
                     "TXT_POLICY_NO": updateObj.TXT_POLICY_NO,
                     "DAT_RENEWAL_EXPIRY_DATE": updateObj.DAT_RENEWAL_EXPIRY_DATE,
                 },
-                UpdateExpression: "SET TXT_PRODUCER_CD = :TXT_PRODUCER_CD",
+                UpdateExpression: "SET TXT_PRODUCER_CD = :TXT_PRODUCER_CD, #flag = :flag",
+                ExpressionAttributeNames: {
+                    "#flag": flag
+                },
                 ExpressionAttributeValues: {
+                    ":flag": true,
                     ':TXT_PRODUCER_CD': updateObj.TXT_PRODUCER_CD
                 },
                 ReturnValues: "UPDATED_NEW"
