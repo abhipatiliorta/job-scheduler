@@ -39,7 +39,7 @@ class RenewalExtractRepository {
                 TableName: TABLE.RENEWAL_EXTRACT_MODIFICATION,
                 Key: {
                     "MODIFICATION_ID": modificationId.toString(),
-                    "TXT_POLICY_NO": policyNo.toString()
+                    // "TXT_POLICY_NO": policyNo.toString()
                 },
                 ConditionExpression: 'NUM_REVISION = :numRev',
                 UpdateExpression: "SET APPROVAL_STATUS = :status, DECLINE_REASON = :declineReason, APPROVAL_DATE = :approvalDate, APPROVED_BY = :approvedBy",

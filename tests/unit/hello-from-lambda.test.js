@@ -5,9 +5,11 @@ const mocha = new Mocha();
 const ccmRequest = {
     "approvedBy": "maker",
     "updatePlicyArray": [{
-        "policyNo": "3412000169",
-        "status": "Approve"
-    }]
+        "policyNo": "3412000720",
+        "status": "Approve",
+        "declineReason": ""
+    }],
+    "flag": "BOOL_RV_EXTRACT_MODIFICATION_FLAG"
 };
 
 mocha.run(() => {
