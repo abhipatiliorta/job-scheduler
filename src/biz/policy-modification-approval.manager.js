@@ -61,7 +61,7 @@ class PolicyModificationApprovalManager {
                         console.info('Step function response: ', JSON.stringify(ccmResponse));
                     }
 
-                    const updatedPolicy = await this.renewalExtractRepository.updateModificationStatus(policyNo, policyObj.NUM_REVISION, status, declineReason, approvedBy);
+                    const updatedPolicy = await this.renewalExtractRepository.updateModificationStatus(policyObj.MODIFICATION_ID, policyNo, policyObj.NUM_REVISION, status, declineReason, approvedBy);
                     console.info(`Updated policy Status as : ${JSON.stringify(status)}`);
                 }
             }

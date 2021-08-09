@@ -32,12 +32,13 @@ class RenewalExtractRepository {
         }
     }
 
-    async updateModificationStatus(policyNo, numRev, status, declineReason, approvedBy) {
+    async updateModificationStatus(modificationId, policyNo, numRev, status, declineReason, approvedBy) {
         try {
 
             const params = {
                 TableName: TABLE.RENEWAL_EXTRACT_MODIFICATION,
                 Key: {
+                    "MODIFICATION_ID": modificationId.toString(),
                     "TXT_POLICY_NO": policyNo.toString()
                 },
                 ConditionExpression: 'NUM_REVISION = :numRev',
