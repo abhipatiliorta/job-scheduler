@@ -56,10 +56,10 @@ class BatchUpdateProccessManager {
                                 policyStatus.push(ipdsResponse.status);
                                 jobStatus = ipdsResponse.jobStatus;
                                 errCount = ipdsResponse.errCount;
+                                policyCount = ipdsResponse.policyCount;
                             } else {
                                 policyStatus.push(policyDetail);
                             }
-                            policyCount = ipdsResponse.policyCount;
                         }
                     }
 
