@@ -18,7 +18,7 @@ class StepService {
         return new Promise((resolve, reject) => {
             const params = {
                 name: namePrams,
-                stateMachineArn: `arn:aws:states:${process.env.REGION}:${ACCOUNT_NO}:stateMachine:RenewalVaultCVStateMachine-UrtanPNtlEV3`,
+                stateMachineArn: `arn:aws:states:${process.env.REGION || 'ap-south-1'}:${ACCOUNT_NO}:stateMachine:RenewalVaultCVStateMachine-UrtanPNtlEV3`,
                 // stateMachineArn: process.env.RENEWAL_PIPELINE_ARN,
                 input: JSON.stringify({ input }),
             };

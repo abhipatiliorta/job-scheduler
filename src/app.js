@@ -3,6 +3,7 @@ const VaultManager = require('./biz/vault.manager');
 const S3UploaderManager = require('./biz/s3uploader.manager');
 const BatchUpdateProcess = require('./biz/batch-update.manager');
 const TriggerCCMManager = require('./biz/trigger-ccm.manager');
+const ProcessIntegrationManager = require('./biz/process-integration.manager');
 const PolicyModificationApprovalManager = require('./biz/policy-modification-approval.manager');
 
 exports.lambdaHandler = async (event, context) => {
@@ -63,6 +64,19 @@ exports.policyModificationApprovalHandler = async (event, context) => {
         return result;
     } catch (err) {
         console.error('Policy modification error: ', err);
+        throw err;
+    }
+};
+
+exports.processIntegrationHandler = async (event, context) => {
+    try {
+        console.info('Event: ', JSON.stringify(event));
+        let processIntegrationManager = new ProcessIntegrationManager();
+        let result = await processIntegrationManager.processIntegration(event, context);
+        console.info('Policy integration result: ', result);
+        return result;
+    } catch (err) {
+        console.error('Policy integration error: ', err);
         throw err;
     }
 };
