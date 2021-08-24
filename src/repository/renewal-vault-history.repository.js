@@ -74,7 +74,7 @@ class RenewalVaultHistoryRepository {
         }
     }
 
-    async policyHistoryByJobid(jobId, stage) {
+    async policyHistoryByJobid(jobId, stage, policyNoList, flag) {
         try {
             let tableName;
             if(stage == "gcv") tableName = TABLE.RENEWAL_VAULT_GCV_HISTORY;
@@ -93,6 +93,12 @@ class RenewalVaultHistoryRepository {
                 }
             };
 
+            if (flag) {
+                params.FilterExpression += ` AND #FLAG = :FLAG`;
+                params.ExpressionAttributeNames = { '#FLAG': flag };
+                params.ExpressionAttributeValues[':FLAG'] = true;
+            }
+
             let data;
             let scanResults = [];
             do {
@@ -101,7 +107,14 @@ class RenewalVaultHistoryRepository {
                 params.ExclusiveStartKey = data.LastEvaluatedKey;
             } while (data.LastEvaluatedKey);
 
-            return scanResults;
+            const filteredArray = [];
+            for (const index in policyNoList) {
+                const policyArr = scanResults.filter(policy => policy.TXT_POLICY_NO == policyNoList[index]);
+                const policyObj = policyArr.sort((a, b) => b.NUM_REVISION -a.NUM_REVISION)[0];
+                if (policyObj) filteredArray.push(policyObj);
+            }
+
+            return filteredArray;
         } catch (err) {
             throw err;
         }

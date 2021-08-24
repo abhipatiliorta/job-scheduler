@@ -1,3 +1,4 @@
+const S3Repository = require("./s3.repository");
 const IPDSRepository = require("./ipds.repository");
 const CCMRepository = require("./ccm.repository");
 const RenewalVaultJobScheduleRepository = require("./renewal-vault-job-schedule.repository");
@@ -7,6 +8,7 @@ const RenewalVaultProcessPolicyListRepository = require("./renewal-vault-process
 
 
 module.exports = {
+    S3Repository,
     IPDSRepository,
     CCMRepository,
     RenewalExtractRepository,

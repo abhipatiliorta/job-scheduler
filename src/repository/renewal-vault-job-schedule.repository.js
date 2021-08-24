@@ -33,6 +33,28 @@ class RenewalVaultJobScheduleRepository {
         }
     }
 
+    async UpdateFileLoacation(updateObj) {
+        try {
+            console.log(`File location update details ${JSON.stringify(updateObj)}`);
+            const params = {
+                TableName: TABLE.RENEWAL_VAULT_JOB_SCHEDULE,
+                Key:{ "JOB_ID": updateObj.jobId.toString() },
+                UpdateExpression: "SET #FILE_URL = :fileName",
+                ExpressionAttributeNames: {
+                    "#FILE_URL": "FILE_URL"
+                },
+                ExpressionAttributeValues: {
+                    ":fileName": updateObj.file
+                },
+                ReturnValues:"UPDATED_NEW"
+            };
+            const data = await documentClient.update(params).promise();
+            return data;
+        } catch (err) {
+            throw err;
+        }
+    }
+
     async UpdateJobStatus(updateObj) {
         try {
             console.log(`Job Schedule update details ${JSON.stringify(updateObj)}`);

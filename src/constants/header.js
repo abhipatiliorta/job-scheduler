@@ -5,5 +5,6 @@ module.exports = {
     JSON: 'application/json',
     X_ECRYPTED: 'encrypted-data',
     PDF: 'application/pdf',
-    CSV: 'text/csv'
+    CSV: 'text/csv',
+    XLSX: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 };

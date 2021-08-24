@@ -6,6 +6,7 @@
     "dependencies": {
         "aws-sdk": "^2.927.0",
         "csvjson": "^5.1.0",
+        "json-as-xlsx": "^2.1.0",
         "moment": "^2.29.1"
     },
     "devDependencies": {
