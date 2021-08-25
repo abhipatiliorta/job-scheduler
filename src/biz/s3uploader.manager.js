@@ -56,6 +56,7 @@ class S3UploaderManager {
                     const encodedPolicy = await this.jobPolicyDto.encodePolicy(policy[index]);
                     policyDeatils.push(encodedPolicy);
                 }
+                uploadFlag ? promiseArray.push({data: JSON.stringify(policyDeatils)}) : null;
             }
             
             if (uploadFlag) {
@@ -73,13 +74,16 @@ class S3UploaderManager {
         const promise = new Promise((resolve, reject) => {
             Promise.all(promiseArray).then(async (values) => {
                 try {
-                    console.log('Policy response: ', values);
-                    // const retrivedPolicies = values.flat();
+                    console.log('Policy response: ', JSON.stringify(values));
+                    // if calling lambda function
                     let retrivedPolicies = [];
                     for (const index in values) {
                         const parsedData = JSON.parse(values[index].data);
                         retrivedPolicies.push(...parsedData);
                     }
+                    (!retrivedPolicies.length) ? retrivedPolicies.push(await this.jobPolicyDto.encodePolicy({})) : null;
+
+                    // const retrivedPolicies = values.flat();     // if calling same function
                     console.info(`Policy List: ${JSON.stringify(retrivedPolicies)}`, jobId);
 
                     // configuration for csv

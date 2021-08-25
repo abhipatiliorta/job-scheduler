@@ -1,10 +1,10 @@
 const moment = require('moment');
 
 class JobPolicyDto {
-  encodePolicy(policyObj) {
+  async encodePolicy(policyObj) {
     let resPolicyObj = {
       "Policy number": policyObj.TXT_POLICY_NO,
-      "Expiry date": moment(policyObj.DAT_RENEWAL_EXPIRY_DATE).format('YYYY-MM-DD'),
+      "Expiry date": policyObj.DAT_RENEWAL_EXPIRY_DATE ? moment(policyObj.DAT_RENEWAL_EXPIRY_DATE).format('YYYY-MM-DD') : null,
       "Fleet code": policyObj.TXT_FLEET_CD,
       "Fleet Name": policyObj.TXT_FLEET_NAME,
       "Producer Code": policyObj.TXT_PRODUCER_CD,
