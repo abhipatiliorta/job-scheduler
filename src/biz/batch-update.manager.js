@@ -39,6 +39,7 @@ class BatchUpdateProccessManager {
                             let ipdsResponse;
                             if (policyDetail.status == 'Failed') {
                                 const stepInput = {
+                                    "JOB_ID": jobDetail.JOB_ID,
                                     "TXT_POLICY_NO": policyDetail.TXT_POLICY_NO,
                                     "DAT_RENEWAL_EXPIRY_DATE": policyDetail.DAT_RENEWAL_EXPIRY_DATE,
                                     "TXT_STAGE": "GC",
