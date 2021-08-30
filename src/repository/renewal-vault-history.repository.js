@@ -18,7 +18,7 @@ class RenewalVaultHistoryRepository {
                 FilterExpression: 'DAT_RENEWAL_EXPIRY_DATE >= :expDateFrom AND DAT_RENEWAL_EXPIRY_DATE <= :expDateTo',
                 ExpressionAttributeValues: {
                     ':expDateFrom': expDateFrom,
-                    ':expDateTo': expDateTo
+                    ':expDateTo': moment(expDateTo).add(1, 'days').format('YYYY-MM-DD')
                 }
             };
             // let data = await documentClient.scan(params).promise();
