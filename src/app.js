@@ -3,6 +3,7 @@ const VaultManager = require('./biz/vault.manager');
 const S3UploaderManager = require('./biz/s3uploader.manager');
 const BatchUpdateProcess = require('./biz/batch-update.manager');
 const TriggerCCMManager = require('./biz/trigger-ccm.manager');
+const TriggerUpdateRVManager = require('./biz/trigger-update-rv.manager');
 const ProcessIntegrationManager = require('./biz/process-integration.manager');
 const PolicyModificationApprovalManager = require('./biz/policy-modification-approval.manager');
 
@@ -73,6 +74,19 @@ exports.processIntegrationHandler = async (event, context) => {
         console.info('Event: ', JSON.stringify(event));
         let processIntegrationManager = new ProcessIntegrationManager();
         let result = await processIntegrationManager.processIntegration(event, context);
+        console.info('Policy integration result: ', result);
+        return result;
+    } catch (err) {
+        console.error('Policy integration error: ', err);
+        throw err;
+    }
+};
+
+exports.triggerUpdateOnRVTableHandler = async (event, context) => {
+    try {
+        console.info('Event: ', JSON.stringify(event));
+        let triggerUpdateRVManager = new TriggerUpdateRVManager();
+        let result = await triggerUpdateRVManager.triggerUpdateOnRVTable(event, context);
         console.info('Policy integration result: ', result);
         return result;
     } catch (err) {
