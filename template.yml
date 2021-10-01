@@ -180,7 +180,7 @@ Resources:
       Environment:
         Variables:
           REGION: ap-south-1
-          STACK: TriggerUpdateRV
+          STACK: RenewalVaultUpdateTrigger
       Policies:
         # - AWSLambdaBasicExecutionRole
         - Statement:

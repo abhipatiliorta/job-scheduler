@@ -63,7 +63,7 @@ class RenewalVaultJobScheduleRepository {
                 Key: {
                     "JOB_ID": updateObj.jobId.toString()
                 },
-                UpdateExpression: "SET #STATUS = :jobStatus, JOB_STATUS = :jobStatus, ERROR_COUNT = :errCount, TXT_POLICY_LIST = :policyStatus, POLICY_COUNT= :policyCount",
+                UpdateExpression: "SET #STATUS = :jobStatus, JOB_STATUS = :jobStatus, ERROR_COUNT = :errCount, TXT_POLICY_LIST = :policyStatus, POLICY_COUNT = :policyCount, ERROR_ATTEMPT = :errAttempt",
                 ExpressionAttributeNames: {
                     "#STATUS": "STATUS"
                 },
@@ -71,7 +71,8 @@ class RenewalVaultJobScheduleRepository {
                     ":jobStatus": updateObj.jobStatus,
                     ":errCount": updateObj.errCount,
                     ":policyStatus": updateObj.policyStatus,
-                    ":policyCount": updateObj.policyCount
+                    ":policyCount": updateObj.policyCount,
+                    ":errAttempt": updateObj.errAttempt,
                 },
                 ReturnValues: "UPDATED_NEW"
             };
@@ -154,7 +155,7 @@ class RenewalVaultJobScheduleRepository {
 
     async findByJobStartDateAndTime(datetime, jobId) {
         try {
-            // datetime = new Date("2021-06-15 23:02:02");
+            // datetime = new Date("2021-10-15 00:02:02");
 
             const date = moment(datetime).format("YYYY-MM-DD");
             const timeTo = moment(datetime).format("HH:mm:ss");
@@ -166,7 +167,9 @@ class RenewalVaultJobScheduleRepository {
 
             const params = {
                 TableName: TABLE.RENEWAL_VAULT_JOB_SCHEDULE,
-                FilterExpression: 'JOB_START_TIME BETWEEN :timeFrom AND :timeTo AND JOB_START_DATE = :date AND attribute_not_exists(JOB_RUN_ID) AND #status = :submitted',
+                FilterExpression: `(JOB_START_TIME BETWEEN :timeFrom AND :timeTo AND JOB_START_DATE = :date
+                                    AND attribute_not_exists(JOB_RUN_ID) AND #status = :submitted)
+                                    OR (JOB_START_DATE <= :date AND JOB_STATUS = :failed AND ERROR_ATTEMPT <= :errAttpt)`,
                 ExpressionAttributeNames: {
                     "#status": "STATUS"
                 },
@@ -174,7 +177,9 @@ class RenewalVaultJobScheduleRepository {
                     ':date': date,
                     ':timeFrom': timeFrom,
                     ':timeTo': timeTo,
-                    ":submitted": "Submitted"
+                    ":failed": "Failed",
+                    ":submitted": "Submitted",
+                    ":errAttpt": 2
                 }
             };
 
@@ -182,12 +187,13 @@ class RenewalVaultJobScheduleRepository {
                 params.FilterExpression = `JOB_ID = :jobId`;
                 delete params.ExpressionAttributeNames;
                 params.ExpressionAttributeValues = {
-                    ":jobId": jobId
+                    ":jobId": jobId.toString()
                 };
             } else if (timeFrom > timeTo) {
-                params.FilterExpression = `(JOB_START_TIME BETWEEN :timeFrom1 AND :timeTo1 AND JOB_START_DATE = :date1) 
-                                        OR (JOB_START_TIME BETWEEN :timeFrom2 AND :timeTo2 AND JOB_START_DATE = :date2) 
-                                        AND attribute_not_exists(JOB_RUN_ID) AND #status = :submitted`;
+                params.FilterExpression = `(((JOB_START_TIME BETWEEN :timeFrom1 AND :timeTo1 AND JOB_START_DATE = :date1) 
+                                        OR (JOB_START_TIME BETWEEN :timeFrom2 AND :timeTo2 AND JOB_START_DATE = :date2))
+                                        AND attribute_not_exists(JOB_RUN_ID) AND #status = :submitted)
+                                        OR (JOB_START_DATE <= :date1 AND JOB_STATUS = :failed AND ERROR_ATTEMPT <= :errAttpt)`;
 
                 params.ExpressionAttributeNames = {
                     "#status": "STATUS"
@@ -200,7 +206,9 @@ class RenewalVaultJobScheduleRepository {
                     ':date2': date,
                     ':timeFrom2': "00:00:00",
                     ':timeTo2': timeTo,
-                    ":submitted": "Submitted"
+                    ":failed": "Failed",
+                    ":submitted": "Submitted",
+                    ":errAttpt": 2
                 };
             }
 
