@@ -21,7 +21,7 @@ class VaultManager {
 
             if (JobsDetails.length) {
                 for (const index in JobsDetails) {
-                    if(!JobsDetails[index].JOB_ID.includes('_') && JobsDetails[index].ERROR_ATTEMPT <= 2) {
+                    if(!JobsDetails[index].JOB_ID.includes('_')) {
                         const jobDetail = JobsDetails[index];
                         jobDetail.ERROR_ATTEMPT++;
 
@@ -85,6 +85,7 @@ class VaultManager {
                         jobDetail.ERROR_COUNT = errCount;
                         const updateObj = {
                             jobId: jobDetail.JOB_ID,
+                            crate_date: jobDetail.CREATE_DATE,
                             JobStartTime: jobDetail.JOB_START_TIME,
                             jobStatus,
                             policyStatus: policyStatus[0],

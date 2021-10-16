@@ -61,7 +61,8 @@ class RenewalVaultJobScheduleRepository {
             const params = {
                 TableName: TABLE.RENEWAL_VAULT_JOB_SCHEDULE,
                 Key: {
-                    "JOB_ID": updateObj.jobId.toString()
+                    "JOB_ID": updateObj.jobId.toString(),
+                    "CREATE_DATE": updateObj.crate_date
                 },
                 UpdateExpression: "SET #STATUS = :jobStatus, JOB_STATUS = :jobStatus, ERROR_COUNT = :errCount, TXT_POLICY_LIST = :policyStatus, POLICY_COUNT = :policyCount, ERROR_ATTEMPT = :errAttempt",
                 ExpressionAttributeNames: {
@@ -169,7 +170,7 @@ class RenewalVaultJobScheduleRepository {
                 TableName: TABLE.RENEWAL_VAULT_JOB_SCHEDULE,
                 FilterExpression: `(JOB_START_TIME BETWEEN :timeFrom AND :timeTo AND JOB_START_DATE = :date
                                     AND attribute_not_exists(JOB_RUN_ID) AND #status = :submitted)
-                                    OR (JOB_START_DATE <= :date AND JOB_STATUS = :failed AND ERROR_ATTEMPT <= :errAttpt)`,
+                                    OR (JOB_START_DATE <= :date AND (JOB_STATUS = :failed OR #status = :IP) AND ERROR_ATTEMPT <= :errAttpt)`,
                 ExpressionAttributeNames: {
                     "#status": "STATUS"
                 },
@@ -179,6 +180,7 @@ class RenewalVaultJobScheduleRepository {
                     ':timeTo': timeTo,
                     ":failed": "Failed",
                     ":submitted": "Submitted",
+                    ":IP": "In Progress",
                     ":errAttpt": 2
                 }
             };
@@ -192,22 +194,23 @@ class RenewalVaultJobScheduleRepository {
             } else if (timeFrom > timeTo) {
                 params.FilterExpression = `(((JOB_START_TIME BETWEEN :timeFrom1 AND :timeTo1 AND JOB_START_DATE = :date1) 
                                         OR (JOB_START_TIME BETWEEN :timeFrom2 AND :timeTo2 AND JOB_START_DATE = :date2))
-                                        AND attribute_not_exists(JOB_RUN_ID) AND #status = :submitted)
-                                        OR (JOB_START_DATE <= :date1 AND JOB_STATUS = :failed AND ERROR_ATTEMPT <= :errAttpt)`;
+                                        AND attribute_not_exists(JOB_RUN_ID) AND (#status = :submitted OR #status = :IP))
+                                        OR (JOB_START_DATE <= :date1 AND (JOB_STATUS = :failed OR #status = :IP) AND ERROR_ATTEMPT <= :errAttpt)`;
 
                 params.ExpressionAttributeNames = {
                     "#status": "STATUS"
                 };
 
                 params.ExpressionAttributeValues = {
-                    ':date1': moment(datetime).subtract(1, 'day').format("YYYY-MM-DD"),
+                    ':date1': '2021-10-04',
                     ':timeFrom1': timeFrom,
                     ':timeTo1': "24:00:00",
-                    ':date2': date,
+                    ':date2': '2021-10-14',
                     ':timeFrom2': "00:00:00",
                     ':timeTo2': timeTo,
                     ":failed": "Failed",
                     ":submitted": "Submitted",
+                    ":IP": "In Progress",
                     ":errAttpt": 2
                 };
             }
