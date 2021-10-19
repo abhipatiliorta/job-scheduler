@@ -62,7 +62,7 @@ class RenewalVaultJobScheduleRepository {
                 TableName: TABLE.RENEWAL_VAULT_JOB_SCHEDULE,
                 Key: {
                     "JOB_ID": updateObj.jobId.toString(),
-                    "CREATE_DATE": updateObj.crate_date
+                    // "CREATE_DATE": updateObj.crate_date
                 },
                 UpdateExpression: "SET #STATUS = :jobStatus, JOB_STATUS = :jobStatus, ERROR_COUNT = :errCount, TXT_POLICY_LIST = :policyStatus, POLICY_COUNT = :policyCount, ERROR_ATTEMPT = :errAttempt",
                 ExpressionAttributeNames: {
@@ -143,7 +143,7 @@ class RenewalVaultJobScheduleRepository {
         try {
             console.log(`Job Schedule details ${JSON.stringify(insertObj)}`);
             const params = {
-                TableName: "renewal_vault_job_schedule",
+                TableName: TABLE.RENEWAL_VAULT_JOB_SCHEDULE,
                 Item: insertObj
             };
             const data = await documentClient.put(params).promise();
