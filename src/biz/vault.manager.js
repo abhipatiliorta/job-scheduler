@@ -36,19 +36,12 @@ class VaultManager {
                         }
                         console.info(`Fetched Data from Renewal Vault Job Table: ${JSON.stringify(policies)}`);
 
-                        const policyStatus = [[]];
-                        let stIndex = 0;
                         let jobStatus = "Success";
                         let errCount = 0;
-                        let policyCount = 0;
+                        let promiseRes;
+                        const promiseArray = [];
                         if (policies) {
                             for (const polIndex in policies) {
-                                const sizeOfarr = JSON.stringify(policyStatus[stIndex]).length / 1024;
-                                if(Math.round(sizeOfarr) > 90) {
-                                    stIndex++;
-                                    policyStatus.push([]);
-                                }
-
                                 if(jobDetail.JOB_STATUS == 'Failed' && !(policies[polIndex].status == 'Failed' && /NetworkingError/.test(policies[polIndex].message))) {
                                     policyStatus[stIndex].push(policies[polIndex]);
                                     policyCount++;
@@ -62,60 +55,52 @@ class VaultManager {
                                         "STAGE": jobDetail.STAGE == "mcv" ? "MISCD" : jobDetail.STAGE == "pcv" ? "PCV" : jobDetail.STAGE == "gcv" ? "GCV" : ""
                                     };
 
-                                    const params = {
-                                        FunctionName: 'renewal-pipeline-cv-IPDSFunction-7YTPEU836K99',
-                                        InvocationType: 'RequestResponse',
-                                        LogType: 'Tail',
-                                        Payload: JSON.stringify({stepInput})
-                                    };
-                                    const ipdsResponse = await this.ipdsRepository.pullIPDS(params, policyDetail, jobStatus, errCount, policyCount);
-
-                                    policyStatus[stIndex].push(ipdsResponse.status);
-                                    jobStatus = ipdsResponse.jobStatus;
-                                    errCount = ipdsResponse.errCount;
-                                    policyCount = ipdsResponse.policyCount;
+                                    promiseArray.push(this.ipdsRepository.pullIPDS(stepInput, policyDetail, jobStatus, errCount));
                                 }
                             }
+                            promiseRes = await this.newFun(promiseArray);
                         }
 
-                        jobDetail.TXT_POLICY_LIST = policyStatus;
-                        jobDetail.STATUS = jobStatus;
-                        jobDetail.JOB_STATUS = jobStatus;
-                        jobDetail.POLICY_COUNT = policyCount;
-                        jobDetail.ERROR_COUNT = errCount;
+                        jobDetail.TXT_POLICY_LIST = promiseRes.policyStatus;
+                        jobDetail.STATUS = promiseRes.jobStatus;
+                        jobDetail.JOB_STATUS = promiseRes.jobStatus;
+                        jobDetail.POLICY_COUNT = policies.length;
+                        jobDetail.ERROR_COUNT = promiseRes.errCount;
                         const updateObj = {
                             jobId: jobDetail.JOB_ID,
                             crate_date: jobDetail.CREATE_DATE,
                             JobStartTime: jobDetail.JOB_START_TIME,
-                            jobStatus,
-                            policyStatus: policyStatus[0],
-                            errCount,
-                            policyCount,
-                            errAttempt: jobDetail.ERROR_ATTEMPT || 0
+                            jobStatus: promiseRes.jobStatus,
+                            policyStatus: promiseRes.policyStatus[0],
+                            errCount: promiseRes.errCount,
+                            policyCount: policies.length,
+                            errAttempt: jobDetail.ERROR_ATTEMPT || 0,
+                            executionStartTime: today,
+                            executionEndTime: new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"}),
                         };
 
                         const updateJobDetails = await this.renewalVaultJobScheduleRepository.UpdateJobStatus(updateObj);
                         console.info(`Updated Job Status Into Renewal Vault Job Schedule Table : ${JSON.stringify(updateJobDetails)}`);
 
-                        if(policyStatus.length > 0) {
-                            for (const pindex in policyStatus) {
+                        if(promiseRes.policyStatus.length > 0) {
+                            for (const pindex in promiseRes.policyStatus) {
                                 if(pindex > 0) {
                                     const insertObj = {
                                         JOB_ID : `${jobDetail.JOB_ID}_${pindex}`,
-                                        TXT_POLICY_LIST : policyStatus[pindex],
-                                        POLICY_COUNT : policyCount,
+                                        TXT_POLICY_LIST : promiseRes.policyStatus[pindex],
+                                        POLICY_COUNT : policies.length,
                                         JOB_START_DATE : jobDetail.JOB_START_DATE,
                                         JOB_START_TIME : jobDetail.JOB_START_TIME,
                                         RENEWAL_EXPIRY_DATE_FROM : jobDetail.RENEWAL_EXPIRY_DATE_FROM,
                                         RENEWAL_EXPIRY_DATE_TO : jobDetail.RENEWAL_EXPIRY_DATE_TO,
                                         REMARKS : jobDetail.REMARKS,
                                         STAGE: jobDetail.STAGE,
-                                        STATUS : jobStatus,
+                                        STATUS : promiseRes.jobStatus,
                                         LOB_NAME: jobDetail.LOB_NAME,
                                         PRODUCT_CODE: jobDetail.PRODUCT_CODE,
-                                        ERROR_COUNT: errCount,
+                                        ERROR_COUNT: promiseRes.errCount,
                                         ERROR_ATTEMPT: updateObj.errAttempt,
-                                        JOB_STATUS: jobStatus
+                                        JOB_STATUS: promiseRes.jobStatus
                                     }
                                     const insertJobDetails = await this.renewalVaultJobScheduleRepository.insertJobStatus(insertObj);
                                     console.info(`Inserted Job Status Into Renewal Vault Job Schedule Table : ${JSON.stringify(insertJobDetails)}`);
@@ -133,6 +118,34 @@ class VaultManager {
             console.error(err);
             throw err;
         }
+    }
+
+    async newFun(promiseArray) {
+        return new Promise((res, rej) => {
+            try {
+                const policyStatus = [[]];
+                let stIndex = 0;
+                let jobStatus = "Success";
+                let errCount = 0;
+                Promise.all(promiseArray).then((values) => {
+                    for (const index in values) {
+                        const sizeOfarr = JSON.stringify(policyStatus[stIndex]).length / 1024;
+                        if(Math.round(sizeOfarr) > 90) {
+                            stIndex++;
+                            policyStatus.push([]);
+                        }
+                        const breResponse = values[index];
+                        
+                        policyStatus[stIndex].push(breResponse.status);
+                        jobStatus = breResponse.jobStatus;
+                        errCount = breResponse.errCount;
+                    }
+                    res({ policyStatus, jobStatus, errCount })
+                });
+            } catch (error) {
+                rej(error);   
+            }
+        })
     }
 }
 

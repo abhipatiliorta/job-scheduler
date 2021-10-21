@@ -64,7 +64,7 @@ class RenewalVaultJobScheduleRepository {
                     "JOB_ID": updateObj.jobId.toString(),
                     // "CREATE_DATE": updateObj.crate_date
                 },
-                UpdateExpression: "SET #STATUS = :jobStatus, JOB_STATUS = :jobStatus, ERROR_COUNT = :errCount, TXT_POLICY_LIST = :policyStatus, POLICY_COUNT = :policyCount, ERROR_ATTEMPT = :errAttempt",
+                UpdateExpression: "SET #STATUS = :jobStatus, JOB_STATUS = :jobStatus, ERROR_COUNT = :errCount, TXT_POLICY_LIST = :policyStatus, POLICY_COUNT = :policyCount, ERROR_ATTEMPT = :errAttempt, EXECUTION_START_TIME = :executionStartTime, EXECUTION_END_TIME = :executionEndTime",
                 ExpressionAttributeNames: {
                     "#STATUS": "STATUS"
                 },
@@ -74,6 +74,8 @@ class RenewalVaultJobScheduleRepository {
                     ":policyStatus": updateObj.policyStatus,
                     ":policyCount": updateObj.policyCount,
                     ":errAttempt": updateObj.errAttempt,
+                    ":executionStartTime": updateObj.executionStartTime,
+                    ":executionEndTime": updateObj.executionEndTime,
                 },
                 ReturnValues: "UPDATED_NEW"
             };

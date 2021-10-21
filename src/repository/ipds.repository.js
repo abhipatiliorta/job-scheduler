@@ -8,8 +8,15 @@ class IPDSRepository {
 
     constructor() { }
 
-    async pullIPDS(params, policyDetail, jobStatus, errCount, policyCount) {
+    async pullIPDS(stepInput, policyDetail, jobStatus, errCount) {
         const promise = new Promise((resolve, reject) => {
+            const params = {
+                FunctionName: 'renewal-pipeline-cv-IPDSFunction-7YTPEU836K99',
+                InvocationType: 'RequestResponse',
+                LogType: 'Tail',
+                Payload: JSON.stringify({stepInput})
+            };
+
             lambda.invoke(params, (err, data) => {
                 const status = {
                     TXT_POLICY_NO: policyDetail.TXT_POLICY_NO,
@@ -19,7 +26,6 @@ class IPDSRepository {
                     TXT_CLIENT_NAME: policyDetail.TXT_CLIENT_NAME,
                     status: ""
                 };
-                policyCount++;
                 if (err) {
                     console.error(err);
                     errCount++;
@@ -39,7 +45,7 @@ class IPDSRepository {
                         status.message = null;
                     }
                 }
-                resolve({ status, jobStatus, errCount, policyCount });
+                resolve({ status, jobStatus, errCount });
             });
         });
         return promise;
