@@ -1,6 +1,7 @@
 const S3Repository = require("./s3.repository");
 const IPDSRepository = require("./ipds.repository");
 const CCMRepository = require("./ccm.repository");
+const NotificationRepository = require("./notification.repository");
 const RenewalExtractRepository = require("./renewal-extract.repository");
 const RenewalVaultAuditRepository = require("./renewal-vault-audit.repository");
 const RenewalVaultHistoryRepository = require("./renewal-vault-history.repository");
@@ -12,6 +13,7 @@ module.exports = {
     S3Repository,
     IPDSRepository,
     CCMRepository,
+    NotificationRepository,
     RenewalExtractRepository,
     RenewalVaultAuditRepository,
     RenewalVaultHistoryRepository,

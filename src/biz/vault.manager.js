@@ -1,5 +1,6 @@
 const {
     IPDSRepository,
+    NotificationRepository,
     RenewalVaultHistoryRepository,
     RenewalVaultJobScheduleRepository
 } = require("../repository");
@@ -9,6 +10,7 @@ class VaultManager {
     constructor(){
         this.renewalVaultHistoryRepository = new RenewalVaultHistoryRepository();
         this.renewalVaultJobScheduleRepository = new RenewalVaultJobScheduleRepository();
+        this.notificationRepository = new NotificationRepository();
         this.ipdsRepository = new IPDSRepository();
     }
 
@@ -43,8 +45,7 @@ class VaultManager {
                         if (policies) {
                             for (const polIndex in policies) {
                                 if(jobDetail.JOB_STATUS == 'Failed' && !(policies[polIndex].status == 'Failed' && /NetworkingError/.test(policies[polIndex].message))) {
-                                    policyStatus[stIndex].push(policies[polIndex]);
-                                    policyCount++;
+                                    promiseArray.push(policies[polIndex]);
                                 } else {
                                     const policyDetail = policies[polIndex];
                                     const stepInput = {
@@ -58,7 +59,7 @@ class VaultManager {
                                     promiseArray.push(this.ipdsRepository.pullIPDS(stepInput, policyDetail, jobStatus, errCount));
                                 }
                             }
-                            promiseRes = await this.newFun(promiseArray);
+                            promiseRes = await this.promiseResolver(promiseArray);
                         }
 
                         jobDetail.TXT_POLICY_LIST = promiseRes.policyStatus;
@@ -107,6 +108,30 @@ class VaultManager {
                                 }
                             }
                         }
+
+                        const notigicationObj = {
+                            NOTIFICATION_ID: Math.round(new Date().getTime()/1000).toString(),
+                            NOTIFICATION_TXT: `${jobDetail.JOB_ID} batch execution completed with status: ${promiseRes.jobStatus}.`,
+                            TIME: new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"}),
+                            NOTIFICATION_FOR: `admin`,   // TODO: map the user
+                            MODULE: 'Collection & Proccessing',
+                            STATUS: 'unseen',
+                            isDeleted: false
+                        };
+                        const addNotification = await this.notificationRepository.addNotification(notigicationObj);
+                        console.info(`Notification added as: ${jobDetail.JOB_ID} batch execution completed with status: ${promiseRes.jobStatus}.`);
+
+                        const { io } = require("socket.io-client");
+                
+                        const socket = io('https://c8jd830vra.execute-api.ap-south-1.amazonaws.com/prod')
+                        // const socket = io('http://localhost:5000/')
+                
+                        socket.on("connect");
+                
+                        socket.emit('add_new_notification', {
+                            batchId: jobDetail.JOB_ID,
+                            user: 'admin'
+                        });
                     }
                 }
                 return JobsDetails;
@@ -120,7 +145,7 @@ class VaultManager {
         }
     }
 
-    async newFun(promiseArray) {
+    async promiseResolver(promiseArray) {
         return new Promise((res, rej) => {
             try {
                 const policyStatus = [[]];
@@ -137,8 +162,8 @@ class VaultManager {
                         const breResponse = values[index];
                         
                         policyStatus[stIndex].push(breResponse.status);
-                        jobStatus = breResponse.jobStatus;
-                        errCount = breResponse.errCount;
+                        jobStatus = jobStatus == 'Success' ? breResponse.jobStatus || breResponse.status : jobStatus;
+                        errCount = breResponse.jobStatus != 'Success' && breResponse.status != 'Success' ? errCount + 1 : errCount;
                     }
                     res({ policyStatus, jobStatus, errCount })
                 });

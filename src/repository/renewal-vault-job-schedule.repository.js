@@ -21,10 +21,27 @@ class RenewalVaultJobScheduleRepository {
                 params.FilterExpression += ' AND STAGE = :stage';
                 params.ExpressionAttributeValues[':stage'] = stage
             }
-            const data = await documentClient.scan(params).promise();
-            if (data) {
-                const { Items } = data;
-                return { Items };
+            
+            let data;
+            let scanResults = [];
+            do {
+                data = await documentClient.scan(params).promise();
+                if (data && data.Items) {
+                    scanResults.push(...data.Items);
+                }
+                params.ExclusiveStartKey = data.LastEvaluatedKey;
+            } while (data.LastEvaluatedKey);
+
+            if (scanResults.length) {
+                const jobDetail = scanResults.find(x => x.JOB_ID == jobId);
+                for (let index = scanResults.length - 1; index >= 0; index--) {
+                    if (scanResults[index].JOB_ID.includes('_')) {
+                        jobDetail.TXT_POLICY_LIST.push(...scanResults[index].TXT_POLICY_LIST);
+                        scanResults.splice(index, 1);
+                    }
+                }
+                console.log(JSON.stringify(scanResults));
+                return { Items: [jobDetail] };
             }
             return null;
         } catch (err) {
@@ -204,10 +221,10 @@ class RenewalVaultJobScheduleRepository {
                 };
 
                 params.ExpressionAttributeValues = {
-                    ':date1': '2021-10-04',
+                    ':date1': moment(datetime).subtract(1, 'day').format("YYYY-MM-DD"),
                     ':timeFrom1': timeFrom,
                     ':timeTo1': "24:00:00",
-                    ':date2': '2021-10-14',
+                    ':date2': date,
                     ':timeFrom2': "00:00:00",
                     ':timeTo2': timeTo,
                     ":failed": "Failed",

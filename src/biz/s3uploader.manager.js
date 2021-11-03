@@ -23,12 +23,14 @@ class S3UploaderManager {
             const stage = event.stage;
             const flag = event.flag || null;
             const uploadFlag = event.uploadFlag;
-            const policyNoList = event.policyNoList || [];
-            const jobData = event.jobData;
             const lobName = stage == "gcv" ? 'MotorCommercialGCV' : stage == "pcv" ? 'MotorCommercialPCV' : stage == "mcv" ? 'MotorCommercialMCV' : null;
             const fileName = `${jobId}-${lobName}.xlsx`;
             const sFileName = `${process.env.FILELOCATION}${fileName}`;
             const maxLimit = 500;
+
+            const jobDetail = await this.renewalVaultJobScheduleRepository.searchWithJobId(jobId);
+            console.info('Batch Details: ', jobDetail[0]);
+            const policyNoList = jobDetail.Items[0].TXT_POLICY_LIST.map(policy => policy.TXT_POLICY_NO);
 
             // const policyList = jobData.TXT_POLICY_LIST;
             // for (const index in policyList) {

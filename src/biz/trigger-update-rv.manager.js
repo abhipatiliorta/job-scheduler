@@ -16,7 +16,7 @@ class TriggerUpdateRVManager {
                     const stage = records[index].eventSourceARN.split('table')[1].split('/')[1].split('renewal_vault_')[1];
 
                     const auditObj = {
-                        AUDIT_ID: Math.round(new Date().getTime()/1000),AUDIT_ID: Math.round(new Date().getTime()/1000).toString(),
+                        AUDIT_ID: Math.round(new Date().getTime()/1000).toString(),
                         UPDATE_DATE: moment().format('YYYY-MM-DD HH:mm:ss'),
                         UPDATED_BY: newImage.UPDATED_BY ? newImage.UPDATED_BY.S : null,
                         OLD_DATA: oldImage,

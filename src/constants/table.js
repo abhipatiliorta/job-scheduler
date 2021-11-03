@@ -12,4 +12,5 @@ module.exports = {
     RENEWAL_VAULT_PCV_HISTORY: "renewal_vault_pcv_history",
     RENEWAL_VAULT_MISCD_HISTORY: "renewal_vault_miscd_history",
     RENEWAL_EXTRACT_MODIFICATION: "renewal_extract_modification",
+    RV_NOTIFICATIONS: "rv_notifications",
 };
