@@ -109,16 +109,18 @@ class VaultManager {
                             }
                         }
 
-                        const notigicationObj = {
+                        const notificationObj = {
                             NOTIFICATION_ID: Math.round(new Date().getTime()/1000).toString(),
                             NOTIFICATION_TXT: `${jobDetail.JOB_ID} batch execution completed with status: ${promiseRes.jobStatus}.`,
                             TIME: new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"}),
                             NOTIFICATION_FOR: `admin`,   // TODO: map the user
-                            MODULE: 'Collection & Proccessing',
-                            STATUS: 'unseen',
-                            isDeleted: false
+                            MODULE: 'Collection & Processing',
+                            IS_NOTIFICATION_VIEWED: false,
+                            isDeleted: false,
+                            JOB_ID:jobDetail.JOB_ID,
+                            JOB_EXECUTION_STATUS:promiseRes.jobStatus
                         };
-                        const addNotification = await this.notificationRepository.addNotification(notigicationObj);
+                        const addNotification = await this.notificationRepository.addNotification(notificationObj);
                         console.info(`Notification added as: ${jobDetail.JOB_ID} batch execution completed with status: ${promiseRes.jobStatus}.`);
 
                         const { io } = require("socket.io-client");
