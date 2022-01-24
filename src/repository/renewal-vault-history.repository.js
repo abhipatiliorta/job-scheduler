@@ -103,8 +103,19 @@ class RenewalVaultHistoryRepository {
             if(stage == "gcv") tableName = TABLE.RENEWAL_VAULT_GCV_HISTORY;
             else if(stage == "pcv") tableName = TABLE.RENEWAL_VAULT_PCV_HISTORY;
             else if(stage == "mcv") tableName = TABLE.RENEWAL_VAULT_MISCD_HISTORY;
+            else if(stage == "medicare") tableName = TABLE.RENEWAL_VAULT_MEDICARE_EXTRACT_PROPOSAL_HISTORY;
 
-            const params = {
+            const params =(stage=="medicare"?{
+                TableName: tableName,
+                IndexName: 'JOB_ID',
+                KeyConditionExpression: 'JOB_ID = :jobId',
+                FilterExpression: 'TXT_POLICY_NO_CHAR <> :policyNo AND NUM_REVISION > :rev',
+                ExpressionAttributeValues: {
+                    ':policyNo': null,
+                    ':jobId': jobId,
+                    ':rev': 0
+                }
+            }:{
                 TableName: tableName,
                 IndexName: 'JOB_ID',
                 KeyConditionExpression: 'JOB_ID = :jobId',
@@ -114,7 +125,37 @@ class RenewalVaultHistoryRepository {
                     ':jobId': jobId,
                     ':rev': 0
                 }
-            };
+            });
+
+            const medicareDyanamoDbRelatedConfig={
+                "member_related":{
+                    TableName: TABLE.RENEWAL_VAULT_MEDICARE_EXTRACT_MEMBER_HISTORY,
+                    KeyConditionExpression:'TXT_POLICY_NO_CHAR = :TXT_POLICY_NO_CHAR',
+                    FilterExpression: 'TXT_POLICY_NO_CHAR <> :policyNo AND NUM_REVISION > :rev',
+                    ExpressionAttributeValues: {
+                        ':policyNo': null,
+                        ':rev': 0
+                    }
+                },
+                "ld_related":{
+                    TableName: TABLE.RENEWAL_VAULT_MEDICARE_EXTRACT_LD_HISTORY,
+                    KeyConditionExpression:'POLICY_NUMBER = :TXT_POLICY_NO_CHAR',
+                    FilterExpression: 'POLICY_NUMBER <> :policyNo AND NUM_REVISION > :rev',
+                    ExpressionAttributeValues: {
+                        ':policyNo': null,
+                        ':rev': 0
+                    }
+                },
+                "othergrid_related":{
+                    TableName: TABLE.RENEWAL_VAULT_MEDICARE_EXTRACT_OTHERGRID_HISTORY,
+                    KeyConditionExpression:'TXT_POLICY_NO_CHAR = :TXT_POLICY_NO_CHAR',
+                    FilterExpression: 'TXT_POLICY_NO_CHAR <> :policyNo AND NUM_REVISION > :rev',
+                    ExpressionAttributeValues: {
+                        ':policyNo': null,
+                        ':rev': 0
+                    }
+                }
+            }
 
             if (flag) {
                 params.FilterExpression += ` AND #FLAG = :FLAG`;
@@ -136,7 +177,34 @@ class RenewalVaultHistoryRepository {
                 const policyObj = policyArr.sort((a, b) => b.NUM_REVISION -a.NUM_REVISION)[0];
                 if (policyObj) filteredArray.push(policyObj);
             }
-
+            
+            if(stage=="medicare"){
+                let medicareOutput={
+                    medicarePolicyData:[],
+                    member_related:0,
+                    ld_related:0,
+                    othergrid_related:0
+                };
+                medicareOutput.medicarePolicyData=await Promise.all(filteredArray.map(async(policyRecord)=>{
+                    try{
+                        for(let tableType in medicareDyanamoDbRelatedConfig){
+                            tableType.ExpressionAttributeValues[":TXT_POLICY_NO_CHAR"]=policyRecord["TXT_POLICY_NO_CHAR"];
+                            policyRecord[tableType]=[];
+                            do{
+                                let data=await documentClient.query(medicareDyanamoDbRelatedConfig[tableType]).promise();
+                                if(data && data.Items) policyRecord[tableType].push(...data.Items);
+                            }while(data.LastEvaluatedKey)
+                            if(medicareOutput[tableType]<policyRecord[tableType].length){
+                                medicareOutput[tableType]=policyRecord[tableType].length;
+                            }
+                        }
+                        return policyRecord;  
+                    }catch(err){
+                        console.log(err);
+                    }
+                }));
+                return medicareOutput;
+            }
             return filteredArray;
         } catch (err) {
             throw err;

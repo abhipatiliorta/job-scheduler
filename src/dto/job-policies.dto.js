@@ -292,6 +292,147 @@ class JobPolicyDto {
     return resPolicyObj;
   }
 
+  async encodeMedicarePolicy(policyObj,member_max_length,othergrid_max_length,ld_max_length){
+    let resPolicyObj ={};
+
+    //proposal columns data
+    resPolicyObj["Date of Birth"]=policyObj["DAT_BIRTH_DT"];
+    resPolicyObj["Is employee of an organization"]=policyObj["TXT_IS_COMPANY_EMPLOYEE"];
+    resPolicyObj["Business type"]=policyObj["TXT_BUSINESS_TYPE"];
+    resPolicyObj["Producer Id"]=policyObj["TXT_INTERMEDIARY_CODE"];
+    resPolicyObj["Policy Number"]=policyObj["TXT_POLICY_NO_CHAR"];
+    resPolicyObj["Variant"]=policyObj["VARIANT"];
+    resPolicyObj["Tenure"]=policyObj["TERM"];
+    resPolicyObj["Plan type"]=policyObj["PLAN_TYPE"];
+    resPolicyObj["Room category"]=policyObj["ROOM_CATEGORY"];
+    resPolicyObj["Accidental death rider"]=policyObj["ACCIDENTALDEATHRIDER"];
+    resPolicyObj["Is policyholder an insured?"]=policyObj["ISPOLICYHOLDER_INS"];
+    resPolicyObj["Total No of Lives"]=policyObj["NUM_NO_OF_LIVES"];
+    resPolicyObj["Insured date of Birth"]=policyObj["DAT_BIRTH_DT"];
+
+    let memberColumns=[
+      {label:"Insured relationship with proposer",value:"RISK_TYPE"},
+      {label:"Cumulative Bonus earned",value:"CUMULATIVE_BONUS_EARNED"},
+      {label:"Sum Insured_Member",value:"APPLICABLE_SI"},
+    ];
+
+    let otherGridColumns=[
+      {label:"claim status",value:"CLAIMSTATUS"}
+    ];
+    
+    let ldColumns=[
+      {label:"Risk Level LD/Discount Rate(%)",value:"LD_RATE"},
+    ]
+
+    //adding member data
+    for(let i=1;i<=member_max_length;i++){
+      if(i<=policyObj.member_related.length){
+        memberColumns.forEach(obj=>{
+          if(obj.label=="Sum Insured_Member"){
+            if(policyObj["PLAN_TYPE"]=="Individual Basis"){
+              resPolicyObj[obj.label+"_"+i]=policyObj["FLOATER_SI"];
+            }else{
+              resPolicyObj[obj.label+"_"+i]=policyObj.member_related[i-1][obj.value];
+            }
+          }else{
+            resPolicyObj[obj.label+"_"+i]=policyObj.member_related[i-1][obj.value];
+          } 
+          
+        })
+      }else{
+        resPolicyObj[obj.label+"_"+i]="-";
+      }
+    }
+
+    //adding othergrid data
+    for(let i=1;i<=member_max_length;i++){
+      if(i<=policyObj.member_related.length){
+        otherGridColumns.forEach(obj=>{
+          resPolicyObj[obj.label+"_"+i]=policyObj.othergrid_related[i-1][obj.value];
+        })
+      }else{
+        resPolicyObj[obj.label+"_"+i]="-";
+      }
+    }
+
+    //adding ld data
+    for(let i=1;i<=member_max_length;i++){
+      if(i<=policyObj.member_related.length){
+        ldColumns.forEach(obj=>{
+          resPolicyObj[obj.label+"_"+i]=policyObj.ld_related[i-1][obj.value];
+        })
+      }else{
+        resPolicyObj[obj.label+"_"+i]="-";
+      }
+    }
+    return resPolicyObj;
+
+  }
+
+  async medicareColumnList(member_max_length,othergrid_max_length,ld_max_length){
+    let memberColumns=[
+      {label:"Insured relationship with proposer",value:"Insured relationship with proposer"},
+      {label:"Cumulative Bonus earned",value:"Cumulative Bonus earned"},
+    ];
+
+    let otherGridColumns=[
+      {label:"claim status",value:"claim status"}
+    ];
+    
+    let ldColumns=[
+      {label:"Risk Level LD/Discount Rate(%)",value:"Risk Level LD/Discount Rate(%)"},
+    ]
+
+    let columnsList=[
+      //proposal related columns
+      {label:"Date of Birth",value:"Date of Birth"},
+      {label:"Is employee of an organization",value:"Is employee of an organization"},
+      {label:"Business type",value:"Business type"},
+      {label:"Producer Id",value:"Producer Id"},
+      {label:"Policy Number",value:"Policy Number"},
+      {label:"Variant",value:"Variant"},
+      {label:"Tenure",value:"Tenure"},
+      {label:"Plan type",value:"Plan type"},
+      {label:"Room category",value:"Room category"},
+      {label:"Accidental death rider",value:"Accidental death rider"},
+      {label:"Is policyholder an insured?",value:"Is policyholder an insured?"},
+      {label:"Total No of Lives",value:"Total No of Lives"},
+      {label:"Insured date of Birth",value:"Insured date of Birth"},
+      // {label:"Insured date of Birth_2",value:"Insured date of Birth_2"},
+      // {label:"Insured date of Birth_3",value:"Insured date of Birth_3"},
+      // {label:"Insured date of Birth_4",value:"Insured date of Birth_4"},
+      // {label:"Insured date of Birth_5",value:"Insured date of Birth_5"},
+      // {label:"Insured date of Birth_6",value:"Insured date of Birth_6"},
+      // {label:"Insured date of Birth_7",value:"Insured date of Birth_7"},
+    ]
+  
+    for(let i=1;i<=member_max_length;i++){
+      memberColumns.forEach(obj=>{
+        obj.label=obj.label+"_"+i;
+        obj.value=obj.value+"_"+i;
+        columnsList.push(obj);
+      })
+    }
+
+    for(let i=1;i<=othergrid_max_length;i++){
+      otherGridColumns.forEach(obj=>{
+        obj.label=obj.label+"_"+i;
+        obj.value=obj.value+"_"+i;
+        columnsList.push(obj);
+      })
+    }
+
+    for(let i=1;i<=ld_max_length;i++){
+      ldColumns.forEach(obj=>{
+        obj.label=obj.label+"_"+i;
+        obj.value=obj.value+"_"+i;
+        columnsList.push(obj);
+      })
+    }
+
+    return columnsList;
+  }
+
   columnList() {
     return [
       { label: "Policy number", value: "Policy number" },

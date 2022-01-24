@@ -23,14 +23,14 @@ class S3UploaderManager {
             const stage = event.stage;
             const flag = event.flag || null;
             const uploadFlag = event.uploadFlag;
-            const lobName = stage == "gcv" ? 'MotorCommercialGCV' : stage == "pcv" ? 'MotorCommercialPCV' : stage == "mcv" ? 'MotorCommercialMCV' : null;
+            const lobName = stage == "gcv" ? 'MotorCommercialGCV' : stage == "pcv" ? 'MotorCommercialPCV' : stage == "mcv" ? 'MotorCommercialMCV' : stage== "medicare"? "MedicareAllVariants":null;
             const fileName = `${jobId}-${lobName}.xlsx`;
             const sFileName = `${process.env.FILELOCATION}${fileName}`;
             const maxLimit = 500;
 
             const jobDetail = await this.renewalVaultJobScheduleRepository.searchWithJobId(jobId);
             console.info('Batch Details: ', jobDetail[0]);
-            const policyNoList = jobDetail.Items[0].TXT_POLICY_LIST.map(policy => policy.TXT_POLICY_NO);
+            const policyNoList = jobDetail.Items[0].TXT_POLICY_LIST.map(policy => stage=="medicare"?policy.TXT_POLICY_NO_CHAR:policy.TXT_POLICY_NO);
 
             // const policyList = jobData.TXT_POLICY_LIST;
             // for (const index in policyList) {
@@ -54,14 +54,22 @@ class S3UploaderManager {
             } else {
                 const policy = await this.renewalVaultHistoryRepository.policyHistoryByJobid(jobId, stage, policyNoList, flag);
                 console.info(`Policy List: ${JSON.stringify(policy)}`)
-                for (const index in policy) {
-                    const encodedPolicy = await this.jobPolicyDto.encodePolicy(policy[index]);
-                    policyDeatils.push(encodedPolicy);
+                if(stage=="medicare"){
+                    for(const index in policy){
+                        const encodedPolicy =await this.jobPolicyDto.encodeMedicarePolicy(policy[index]);
+                        policyDeatils.push(encodePolicy);
+                    }
+                }else{
+                    for (const index in policy) {
+                        const encodedPolicy = await this.jobPolicyDto.encodePolicy(policy[index]);
+                        policyDeatils.push(encodedPolicy);
+                    }
                 }
                 uploadFlag ? promiseArray.push({data: JSON.stringify(policyDeatils)}) : null;
             }
             
             if (uploadFlag) {
+                
                 const uploadRes = await this.uploadtoS3(jobId, promiseArray, fileName, sFileName);
                 return uploadRes;
             } else {
@@ -72,7 +80,7 @@ class S3UploaderManager {
         }
     }
 
-    async uploadtoS3(jobId, promiseArray, fileName, sFileName) {
+    async uploadtoS3(jobId, promiseArray, fileName, sFileName,forMedicare=false) {
         const promise = new Promise((resolve, reject) => {
             Promise.all(promiseArray).then(async (values) => {
                 try {
@@ -83,7 +91,7 @@ class S3UploaderManager {
                         const parsedData = JSON.parse(values[index].data);
                         retrivedPolicies.push(...parsedData);
                     }
-                    (!retrivedPolicies.length) ? retrivedPolicies.push(await this.jobPolicyDto.encodePolicy({})) : undefined;
+                    (!retrivedPolicies.length) ? forMedicare?retrivedPolicies.push(await this.jobPolicyDto.encodePolicy({member_related:[],ld_related:[],othergrid_related:[]})):retrivedPolicies.push(await this.jobPolicyDto.encodePolicy({})) : undefined;
 
                     // const retrivedPolicies = values.flat();     // if calling same function
                     console.info(`Policy List: ${JSON.stringify(retrivedPolicies)}`, jobId);
@@ -102,11 +110,20 @@ class S3UploaderManager {
                     // );
 
                     // configuration for excel
-                    let data = [{
-                        sheet: 'sheet1',
-                        columns: this.jobPolicyDto.columnList(),
-                        content: retrivedPolicies
-                    }]
+                    let data=[];
+                    if(forMedicare){
+                        data = [{
+                            sheet: 'sheet1',
+                            columns: this.jobPolicyDto.medicareColumnList(),
+                            content: retrivedPolicies
+                        }]
+                    }else{
+                        data = [{
+                            sheet: 'sheet1',
+                            columns: this.jobPolicyDto.columnList(),
+                            content: retrivedPolicies
+                        }]
+                    }
 
                     let settings = {
                         writeOptions: {

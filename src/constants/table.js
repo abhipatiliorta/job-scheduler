@@ -13,4 +13,17 @@ module.exports = {
     RENEWAL_VAULT_MISCD_HISTORY: "renewal_vault_miscd_history",
     RENEWAL_EXTRACT_MODIFICATION: "renewal_extract_modification",
     RV_NOTIFICATIONS: "rv_notifications",
+
+    //medicare related dynamodb table names
+    RENEWAL_VAULT_MEDICARE_EXTRACT_PROPOSAL:"renewal_vault_medicare_extract_proposal",
+    RENEWAL_VAULT_MEDICARE_EXTRACT_MEMBER:"renewal_vault_medicare_extract_member",
+    RENEWAL_VAULT_MEDICARE_EXTRACT_OTHERGRID:"renewal_vault_medicare_extract_othergrid",
+    RENEWAL_VAULT_MEDICARE_EXTRACT_LD:"renewal_vault_medicare_extract_ld",
+
+    RENEWAL_VAULT_MEDICARE_EXTRACT_PROPOSAL_HISTORY:"renewal_vault_medicare_extract_proposal_history",
+    RENEWAL_VAULT_MEDICARE_EXTRACT_MEMBER_HISTORY:"renewal_vault_medicare_extract_member_history",
+    RENEWAL_VAULT_MEDICARE_EXTRACT_OTHERGRID_HISTORY:"renewal_vault_medicare_extract_othergrid_history",
+    RENEWAL_VAULT_MEDICARE_EXTRACT_LD_HISTORY:"renewal_vault_medicare_extract_ld_history",
+
+
 };
