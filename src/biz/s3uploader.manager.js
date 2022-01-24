@@ -83,7 +83,7 @@ class S3UploaderManager {
                         const parsedData = JSON.parse(values[index].data);
                         retrivedPolicies.push(...parsedData);
                     }
-                    (!retrivedPolicies.length) ? retrivedPolicies.push(await this.jobPolicyDto.encodePolicy({})) : null;
+                    (!retrivedPolicies.length) ? retrivedPolicies.push(await this.jobPolicyDto.encodePolicy({})) : undefined;
 
                     // const retrivedPolicies = values.flat();     // if calling same function
                     console.info(`Policy List: ${JSON.stringify(retrivedPolicies)}`, jobId);

@@ -34,7 +34,10 @@ class VaultManager {
                             let flatten = moreArr.flat();
                             policies.push(...flatten);
                         } else {
-                            policies = await this.renewalVaultHistoryRepository.findPoliciesByExpiryDate(jobDetail.STAGE, jobDetail.RENEWAL_EXPIRY_DATE_FROM, jobDetail.RENEWAL_EXPIRY_DATE_TO);
+                            if(jobDetail.FILTER_TYPE == 'dateRange')
+                                policies = await this.renewalVaultHistoryRepository.findPoliciesByExpiryDate(jobDetail.STAGE, jobDetail.RENEWAL_EXPIRY_DATE_FROM, jobDetail.RENEWAL_EXPIRY_DATE_TO);
+                            else if(jobDetail.STAGE == 'medicare' && jobDetail.FILTER_TYPE == 'policyNo')
+                                policies = await this.renewalVaultHistoryRepository.findMedicarePolicyByPolicyNo(jobDetail.STAGE, jobDetail.POLICY_NO);
                         }
                         console.info(`Fetched Data from Renewal Vault Job Table: ${JSON.stringify(policies)}`);
 
@@ -115,7 +118,7 @@ class VaultManager {
                             TIME: new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"}),
                             NOTIFICATION_FOR: `admin`,   // TODO: map the user
                             MODULE: 'Collection & Processing',
-                            IS_NOTIFICATION_VIEWED: false,
+                            IS_NOTIFICATION_VIEWED: 0,
                             isDeleted: false,
                             JOB_ID:jobDetail.JOB_ID,
                             JOB_EXECUTION_STATUS:promiseRes.jobStatus

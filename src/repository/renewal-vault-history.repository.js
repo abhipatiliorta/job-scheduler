@@ -6,6 +6,29 @@ class RenewalVaultHistoryRepository {
 
     constructor() { }
 
+    async findMedicarePolicyByPolicyNo(stage, policyNo) {
+        try {
+            let TableName;
+            if (stage == "gcv") TableName = TABLE.RENEWAL_VAULT_GCV;
+            else if (stage == "pcv") TableName = TABLE.RENEWAL_VAULT_PCV;
+            else if (stage == "mcv") TableName = TABLE.RENEWAL_VAULT_MISCD;
+
+            const params = {
+                TableName,
+                KeyConditionExpression: 'TXT_POLICY_NO_CHAR = :policyNo',
+                ExpressionAttributeValues: {
+                    ':policyNo': policyNo
+                }
+            };
+            const data = await documentClient.query(params).promise();
+
+            return data;
+        } catch (err) {
+            console.log(`err ${err}`);
+            throw err;
+        }
+    }
+
     async findPoliciesByExpiryDate(stage, expDateFrom, expDateTo) {
         try {
             let TableName;
