@@ -39,6 +39,7 @@ class S3UploaderManager {
             //     const encodedPolicy = await this.jobPolicyDto.encodePolicy(policy[0]);
             //     policyDeatils.push(encodedPolicy);
             // }
+            let medicareRelatedOptions={};
 
             if (policyNoList.length > maxLimit) {
                 let clonePolicyNoList = JSON.stringify(policyNoList);
@@ -53,10 +54,19 @@ class S3UploaderManager {
                 } while (iteration > 0);
             } else {
                 const policy = await this.renewalVaultHistoryRepository.policyHistoryByJobid(jobId, stage, policyNoList, flag);
-                console.info(`Policy List: ${JSON.stringify(policy)}`)
+                console.info(`Policy List: ${JSON.stringify(policy)}`);
+                medicareRelatedOptions={
+                    member_max_length:policy.member_max_length,
+                    othergrid_max_length:policy.othergrid_max_length,
+                    ld_max_length:policy.ld_max_length,
+                }
                 if(stage=="medicare"){
                     for(const index in policy){
-                        const encodedPolicy =await this.jobPolicyDto.encodeMedicarePolicy(policy[index]);
+                        const encodedPolicy =await this.jobPolicyDto.encodeMedicarePolicy(
+                            policy.medicarePolicyData[index],
+                            medicareRelatedOptions.member_max_length,
+                            medicareRelatedOptions.othergrid_max_length,
+                            medicareRelatedOptions.ld_max_length);
                         policyDeatils.push(encodePolicy);
                     }
                 }else{
@@ -70,8 +80,14 @@ class S3UploaderManager {
             
             if (uploadFlag) {
                 
-                const uploadRes = await this.uploadtoS3(jobId, promiseArray, fileName, sFileName);
-                return uploadRes;
+                if(stage=="medicare"){
+                    const uploadRes = await this.uploadtoS3(jobId, promiseArray, fileName, sFileName,true,medicareRelatedOptions);
+                    return uploadRes;
+                }else{
+                    const uploadRes = await this.uploadtoS3(jobId, promiseArray, fileName, sFileName);
+                    return uploadRes;
+                }
+                
             } else {
                 return policyDeatils;
             }
@@ -80,7 +96,7 @@ class S3UploaderManager {
         }
     }
 
-    async uploadtoS3(jobId, promiseArray, fileName, sFileName,forMedicare=false) {
+    async uploadtoS3(jobId, promiseArray, fileName, sFileName,forMedicare=false,medicareRelatedOptions={}) {
         const promise = new Promise((resolve, reject) => {
             Promise.all(promiseArray).then(async (values) => {
                 try {
@@ -91,7 +107,7 @@ class S3UploaderManager {
                         const parsedData = JSON.parse(values[index].data);
                         retrivedPolicies.push(...parsedData);
                     }
-                    (!retrivedPolicies.length) ? forMedicare?retrivedPolicies.push(await this.jobPolicyDto.encodePolicy({member_related:[],ld_related:[],othergrid_related:[]})):retrivedPolicies.push(await this.jobPolicyDto.encodePolicy({})) : undefined;
+                    (!retrivedPolicies.length) ? forMedicare?retrivedPolicies.push(await this.jobPolicyDto.encodePolicy({})):retrivedPolicies.push(await this.jobPolicyDto.encodePolicy({})) : undefined;
 
                     // const retrivedPolicies = values.flat();     // if calling same function
                     console.info(`Policy List: ${JSON.stringify(retrivedPolicies)}`, jobId);
@@ -112,9 +128,10 @@ class S3UploaderManager {
                     // configuration for excel
                     let data=[];
                     if(forMedicare){
+
                         data = [{
                             sheet: 'sheet1',
-                            columns: this.jobPolicyDto.medicareColumnList(),
+                            columns: this.jobPolicyDto.medicareColumnList(medicareRelatedOptions.member_max_length,medicareRelatedOptions.othergrid_max_length,medicareRelatedOptions.ld_max_length),
                             content: retrivedPolicies
                         }]
                     }else{

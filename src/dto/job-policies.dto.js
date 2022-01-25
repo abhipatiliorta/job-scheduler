@@ -345,7 +345,7 @@ class JobPolicyDto {
     }
 
     //adding othergrid data
-    for(let i=1;i<=member_max_length;i++){
+    for(let i=1;i<=othergrid_max_length;i++){
       if(i<=policyObj.member_related.length){
         otherGridColumns.forEach(obj=>{
           resPolicyObj[obj.label+"_"+i]=policyObj.othergrid_related[i-1][obj.value];
@@ -356,7 +356,7 @@ class JobPolicyDto {
     }
 
     //adding ld data
-    for(let i=1;i<=member_max_length;i++){
+    for(let i=1;i<=ld_max_length;i++){
       if(i<=policyObj.member_related.length){
         ldColumns.forEach(obj=>{
           resPolicyObj[obj.label+"_"+i]=policyObj.ld_related[i-1][obj.value];
