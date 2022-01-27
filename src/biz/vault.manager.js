@@ -34,10 +34,10 @@ class VaultManager {
                             let flatten = moreArr.flat();
                             policies.push(...flatten);
                         } else {
-                            if(jobDetail.FILTER_TYPE == 'dateRange')
-                                policies = await this.renewalVaultHistoryRepository.findPoliciesByExpiryDate(jobDetail.STAGE, jobDetail.RENEWAL_EXPIRY_DATE_FROM, jobDetail.RENEWAL_EXPIRY_DATE_TO);
-                            else if(jobDetail.STAGE == 'medicare' && jobDetail.FILTER_TYPE == 'policyNo')
-                                policies = await this.renewalVaultHistoryRepository.findMedicarePolicyByPolicyNo(jobDetail.STAGE, jobDetail.POLICY_NO);
+                            if(jobDetail.STAGE == 'Medicare - All Variants')
+                                policies = await this.renewalVaultHistoryRepository.findMedicarePolicies(jobDetail.POLICY_NO, jobDetail.RENEWAL_EXPIRY_DATE_FROM, jobDetail.RENEWAL_EXPIRY_DATE_TO);
+                            else
+                                policies = await this.renewalVaultHistoryRepository.findMotorPoliciesByExpiryDate(jobDetail.STAGE, jobDetail.RENEWAL_EXPIRY_DATE_FROM, jobDetail.RENEWAL_EXPIRY_DATE_TO);
                         }
                         console.info(`Fetched Data from Renewal Vault Job Table: ${JSON.stringify(policies)}`);
 
@@ -45,21 +45,25 @@ class VaultManager {
                         let errCount = 0;
                         let promiseRes;
                         const promiseArray = [];
-                        if (policies) {
+                        if (policies.length) {
                             for (const polIndex in policies) {
-                                if(jobDetail.JOB_STATUS == 'Failed' && !(policies[polIndex].status == 'Failed' && /NetworkingError/.test(policies[polIndex].message))) {
-                                    promiseArray.push(policies[polIndex]);
-                                } else {
-                                    const policyDetail = policies[polIndex];
-                                    const stepInput = {
-                                        "JOB_ID": jobDetail.JOB_ID,
-                                        "TXT_POLICY_NO": policyDetail.TXT_POLICY_NO,
-                                        "DAT_RENEWAL_EXPIRY_DATE": policyDetail.DAT_RENEWAL_EXPIRY_DATE,
-                                        "TXT_STAGE": "GC",
-                                        "STAGE": jobDetail.STAGE == "mcv" ? "MISCD" : jobDetail.STAGE == "pcv" ? "PCV" : jobDetail.STAGE == "gcv" ? "GCV" : ""
-                                    };
+                                if (jobDetail.STAGE == 'Medicare - All Variants') {
 
-                                    promiseArray.push(this.ipdsRepository.pullIPDS(stepInput, policyDetail, jobStatus, errCount));
+                                } else {
+                                    if(jobDetail.JOB_STATUS == 'Failed' && !(policies[polIndex].status == 'Failed' && /NetworkingError/.test(policies[polIndex].message))) {
+                                        promiseArray.push(policies[polIndex]);
+                                    } else {
+                                        const policyDetail = policies[polIndex];
+                                        const stepInput = {
+                                            "JOB_ID": jobDetail.JOB_ID,
+                                            "TXT_POLICY_NO": policyDetail.TXT_POLICY_NO,
+                                            "DAT_RENEWAL_EXPIRY_DATE": policyDetail.DAT_RENEWAL_EXPIRY_DATE,
+                                            "TXT_STAGE": "GC",
+                                            "STAGE": jobDetail.STAGE == "mcv" ? "MISCD" : jobDetail.STAGE == "pcv" ? "PCV" : jobDetail.STAGE == "gcv" ? "GCV" : ""
+                                        };
+
+                                        promiseArray.push(this.ipdsRepository.pullIPDS(stepInput, policyDetail, jobStatus, errCount));
+                                    }
                                 }
                             }
                             promiseRes = await this.promiseResolver(promiseArray);
