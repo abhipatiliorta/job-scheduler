@@ -63,7 +63,7 @@ class S3UploaderManager {
                 if (stage == "Medicare - All Variants") {
                     for (const index in policy) {
                         const encodedPolicy = policy.medicarePolicyData[index] ? await this.jobPolicyDto.encodeMedicarePolicy(
-                            policy.medicarePolicyData[index],
+                            policy[index].medicarePolicyData, jobId, stage,
                             medicareRelatedOptions.member_max_length,
                             medicareRelatedOptions.othergrid_max_length,
                             medicareRelatedOptions.ld_max_length) : {};
@@ -130,10 +130,10 @@ class S3UploaderManager {
                     if (forMedicare) {
                         data = [{
                             sheet: 'sheet1',
-                            columns: await this.jobPolicyDto.medicareColumnList(medicareRelatedOptions.member_max_length,medicareRelatedOptions.othergrid_max_length,medicareRelatedOptions.ld_max_length),
+                            columns: await this.jobPolicyDto.medicareColumnList(medicareRelatedOptions.member_max_length, medicareRelatedOptions.othergrid_max_length, medicareRelatedOptions.ld_max_length),
                             content: retrivedPolicies
                         }]
-                    }else{
+                    } else {
                         data = [{
                             sheet: 'sheet1',
                             columns: this.jobPolicyDto.columnList(),
@@ -141,7 +141,7 @@ class S3UploaderManager {
                         }]
                     }
 
-                    let settings = {
+                    const settings = {
                         writeOptions: {
                             type: 'buffer',
                             bookType: 'xlsx'

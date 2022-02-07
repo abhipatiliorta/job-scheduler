@@ -292,23 +292,146 @@ class JobPolicyDto {
     return resPolicyObj;
   }
 
-  async encodeMedicarePolicy(policyObj, member_max_length, othergrid_max_length, ld_max_length) {
-    let resPolicyObj = {};
-
-    //proposal columns data
-    resPolicyObj["Date of Birth"] = policyObj["DAT_BIRTH_DT"];
-    resPolicyObj["Is employee of an organization"] = policyObj["TXT_IS_COMPANY_EMPLOYEE"];
-    resPolicyObj["Business type"] = policyObj["TXT_BUSINESS_TYPE"];
-    resPolicyObj["Producer Id"] = policyObj["TXT_INTERMEDIARY_CODE"];
-    resPolicyObj["Policy Number"] = policyObj["TXT_POLICY_NO_CHAR"];
-    resPolicyObj["Variant"] = policyObj["VARIANT"];
-    resPolicyObj["Tenure"] = policyObj["TERM"];
-    resPolicyObj["Plan type"] = policyObj["PLAN_TYPE"];
-    resPolicyObj["Room category"] = policyObj["ROOM_CATEGORY"];
-    resPolicyObj["Accidental death rider"] = policyObj["ACCIDENTALDEATHRIDER"];
-    resPolicyObj["Is policyholder an insured?"] = policyObj["ISPOLICYHOLDER_INS"];
-    resPolicyObj["Total No of Lives"] = policyObj["NUM_NO_OF_LIVES"];
-    resPolicyObj["Insured date of Birth"] = policyObj["DAT_BIRTH_DT"];
+  async encodeMedicarePolicy(policyObj, jobId, stage, member_max_length, othergrid_max_length, ld_max_length) {
+    let resPolicyObj = {
+      "Product name": policyObj.TXT_PRODUCT_NAME,
+      "Policy Number": policyObj.TXT_POLICY_NO_CHAR,
+      "Expiry date": moment(policyObj.DAT_RENEWAL_EXPIRY_DATE).format('YYYY-MM-DD'),
+      "Batch ID": jobId,
+      "LOB": stage,
+      //proposal columns data
+      "Date of Birth": policyObj.DAT_BIRTH_DT,
+      "Is employee of an organization": policyObj.TXT_IS_COMPANY_EMPLOYEE,
+      "Business type": policyObj.TXT_BUSINESS_TYPE,
+      "Producer Id": policyObj.TXT_INTERMEDIARY_CODE,
+      "Policy Number": policyObj.TXT_POLICY_NO_CHAR,
+      "Variant": policyObj.VARIANT,
+      "Tenure": policyObj.TERM,
+      "Plan type": policyObj.PLAN_TYPE,
+      "Room category": policyObj.ROOM_CATEGORY,
+      "Accidental death rider": policyObj.ACCIDENTALDEATHRIDER,
+      "Is policyholder an insured?": policyObj.ISPOLICYHOLDER_INS,
+      "Total No of Lives": policyObj.NUM_NO_OF_LIVES,
+      "Insured date of Birth": policyObj.DAT_BIRTH_DT,
+      // yet to fetch from BRE. Set null for now.
+      "Parent Policy Number": null,   // BRE,
+      "Split Policy": null,   // BRE,
+      "Renewal Flag": null,   // BRE,
+      "Risk Level LD/Discount_1": null,   // BRE,
+      "Risk Level LD/Discount_2": null,   // BRE,
+      "Risk Level LD/Discount_3": null,   // BRE,
+      "Risk Level LD/Discount_4": null,   // BRE,
+      "Risk Level LD/Discount_5": null,   // BRE,
+      "Risk Level LD/Discount_6": null,   // BRE,
+      "Risk Level LD/Discount_7": null,   // BRE,
+      "IPDS Error": null,   // BRE,
+      "CUMULATIVE_BONUS_MEMBER1": null,   // BRE,
+      "CUMULATIVE_BONUS_MEMBER2": null,   // BRE,
+      "CUMULATIVE_BONUS_MEMBER3": null,   // BRE,
+      "CUMULATIVE_BONUS_MEMBER4": null,   // BRE,
+      "CUMULATIVE_BONUS_MEMBER5": null,   // BRE,
+      "CUMULATIVE_BONUS_MEMBER6": null,   // BRE,
+      "CUMULATIVE_BONUS_MEMBER7": null,   // BRE,
+      "PA rider premium_1": null,   // BRE,
+      "PA rider premium_2": null,   // BRE,
+      "PA rider premium_3": null,   // BRE,
+      "PA rider premium_4": null,   // BRE,
+      "PA rider premium_5": null,   // BRE,
+      "PA rider premium_6": null,   // BRE,
+      "PA rider premium_7": null,   // BRE,
+      "Scheme Type_Upsell 1": null,   // BRE,
+      "Scheme Type_Upsell 2": null,   // BRE,
+      "Scheme Type_Upsell 3": null,   // BRE,
+      "Scheme Type_Upsell 4": null,   // BRE,
+      "Scheme Type_Upsell 5": null,   // BRE,
+      "Scheme Type_Upsell 6": null,   // BRE,
+      "Scheme Type_Upsell 7": null,   // BRE,
+      "Scheme Type_Upsell 8": null,   // BRE,
+      "Scheme Type_Upsell 9": null,   // BRE,
+      "As-Is Renewal Premium ": null,   // BRE,
+      "Member 1 As-Is Premium": null,   // BRE,
+      "Member 3 Premium": null,   // BRE,
+      "Member 4 Premium": null,   // BRE,
+      "Member 5 Premium": null,   // BRE,
+      "Member 6 Premium": null,   // BRE,
+      "Member 7 Premium": null,   // BRE,
+      "Upgrade Tenure 1": null,   // BRE,
+      "Upgrade Tenure 1 Premium": null,   // BRE,
+      "Upgrade Tenure 2": null,   // BRE,
+      "Upgrade Tenure 2 Premium": null,   // BRE,
+      "Upgrade SI 1": null,   // BRE,
+      "Upgrade SI 1 Premium": null,   // BRE,
+      "Upgrade SI 2 Premium": null,   // BRE,
+      "MediCare Without PA rider ": null,   // BRE,
+      "MediCare with PA rider  Premium ": null,   // BRE,
+      "MediCare with No room restriction ": null,   // BRE,
+      "Medicare Premier  Premium ": null,   // BRE,
+      "MediCare Plus Global rider  Premium ": null,   // BRE,
+      // yet to fetch from BRE. Set null for now.
+      "CSGT": null,   // IPDS V2,
+      "CGST %": null,   // IPDS V2,
+      "SGST": null,   // IPDS V2,
+      "SGST %": null,   // IPDS V2,
+      "CSGT": null,   // IPDS V2,
+      "CGST %": null,   // IPDS V2,
+      "SGST": null,   // IPDS V2,
+      "SGST %": null,   // IPDS V2,
+      "Tenure 1 Upgrade Total Tax": null,   // IPDS V2,
+      "CSGT": null,   // IPDS V2,
+      "CGST %": null,   // IPDS V2,
+      "SGST": null,   // IPDS V2,
+      "SGST %": null,   // IPDS V2,
+      "Tenure 2 Upgrade Total Tax": null,   // IPDS V2,
+      "CSGT": null,   // IPDS V2,
+      "CGST %": null,   // IPDS V2,
+      "SGST": null,   // IPDS V2,
+      "SGST %": null,   // IPDS V2,
+      "Upgrade SI 1 Total Tax": null,   // IPDS V2,
+      "CSGT": null,   // IPDS V2,
+      "CGST %": null,   // IPDS V2,
+      "SGST": null,   // IPDS V2,
+      "SGST %": null,   // IPDS V2,
+      "Upgrade SI 2 Total Tax": null,   // IPDS V2,
+      "CSGT": null,   // IPDS V2,
+      "CGST %": null,   // IPDS V2,
+      "SGST": null,   // IPDS V2,
+      "SGST %": null,   // IPDS V2,
+      "MediCare Without PA ride Total Tax": null,   // IPDS V2,
+      "CSGT": null,   // IPDS V2,
+      "CGST %": null,   // IPDS V2,
+      "SGST": null,   // IPDS V2,
+      "SGST %": null,   // IPDS V2,
+      "MediCare with PA rider Total Tax": null,   // IPDS V2,
+      "CSGT": null,   // IPDS V2,
+      "CGST %": null,   // IPDS V2,
+      "SGST": null,   // IPDS V2,
+      "SGST %": null,   // IPDS V2,
+      "MediCare with No room restriction  Total Tax": null,   // IPDS V2,
+      "CSGT": null,   // IPDS V2,
+      "CGST %": null,   // IPDS V2,
+      "SGST": null,   // IPDS V2,
+      "SGST %": null,   // IPDS V2,
+      "Medicare Premier Total Tax": null,   // IPDS V2,
+      "CSGT": null,   // IPDS V2,
+      "CGST %": null,   // IPDS V2,
+      "SGST": null,   // IPDS V2,
+      "SGST %": null,   // IPDS V2,
+      "MediCare Plus Global rider Total Tax": null,   // IPDS V2,
+      "As-Is Renewal Premium with Tax": null,   // To be calculated by RV,
+      "Upgrade Tenure 1 Premium with Tax": null,  // To be calculated by RV,
+      "Upgrade Tenure 2 Premium with Tax": null,  // To be calculated by RV,
+      "Upgrade SI 1 Premium with Tax": null,  // To be calculated by RV,
+      "Upgrade SI 2 Premium with Tax": null,  // To be calculated by RV,
+      "MediCare Without PA rider  Premium with Tax": null,  // To be calculated by RV,
+      "MediCare with PA rider  Premium with Tax": null,   // To be calculated by RV,
+      "MediCare with No room restriction  Premium with Tax": null,  // To be calculated by RV,
+      "Medicare Premier  Premium with Tax": null,   // To be calculated by RV,
+      "MediCare Plus Global rider  Premium with Tax": null,   // To be calculated by RV,
+      "STP/NSTP Flag": null,
+      "Type Of Claim": null,
+      "Agent State Code": null,
+      "Customer State Code": null,
+    };
 
     let memberColumns = [{
         label: "Insured relationship with proposer",
@@ -379,6 +502,17 @@ class JobPolicyDto {
 
   }
 
+  async medicareColumnListArr(object) {
+    const columnList = [];
+    for (const key in object) {
+      columnList.push({
+        label: key,
+        value: key
+      })
+    }
+    return columnList;
+  }
+
   async medicareColumnList(member_max_length, othergrid_max_length, ld_max_length) {
     let memberColumns = [{
         label: "Insured relationship with proposer",
@@ -401,6 +535,26 @@ class JobPolicyDto {
     }, ]
 
     let columnsList = [
+      {
+        label: "Product name",
+        value: "Product name"
+      },
+      {
+        label: "Policy Number",
+        value: "Policy Number"
+      },
+      {
+        label: "Expiry date",
+        value: "Expiry date"
+      },
+      {
+        label: "Batch ID",
+        value: "Batch ID"
+      },
+      {
+        label: "LOB",
+        value: "LOB"
+      },
       //proposal related columns
       {
         label: "Date of Birth",
@@ -460,6 +614,470 @@ class JobPolicyDto {
       // {label:"Insured date of Birth_5",value:"Insured date of Birth_5"},
       // {label:"Insured date of Birth_6",value:"Insured date of Birth_6"},
       // {label:"Insured date of Birth_7",value:"Insured date of Birth_7"},
+      {
+        label: "Parent Policy Number",
+        value: "Parent Policy Number"
+      },
+      {
+        label: "Split Policy",
+        value: "Split Policy"
+      },
+      {
+        label: "Renewal Flag",
+        value: "Renewal Flag"
+      },
+      {
+        label: "Risk Level LD/Discount_1",
+        value: "Risk Level LD/Discount_1"
+      },
+      {
+        label: "Risk Level LD/Discount_2",
+        value: "Risk Level LD/Discount_2"
+      },
+      {
+        label: "Risk Level LD/Discount_3",
+        value: "Risk Level LD/Discount_3"
+      },
+      {
+        label: "Risk Level LD/Discount_4",
+        value: "Risk Level LD/Discount_4"
+      },
+      {
+        label: "Risk Level LD/Discount_5",
+        value: "Risk Level LD/Discount_5"
+      },
+      {
+        label: "Risk Level LD/Discount_6",
+        value: "Risk Level LD/Discount_6"
+      },
+      {
+        label: "Risk Level LD/Discount_7",
+        value: "Risk Level LD/Discount_7"
+      },
+      {
+        label: "IPDS Error",
+        value: "IPDS Error"
+      },
+      {
+        label: "CUMULATIVE_BONUS_MEMBER1",
+        value: "CUMULATIVE_BONUS_MEMBER1"
+      },
+      {
+        label: "CUMULATIVE_BONUS_MEMBER2",
+        value: "CUMULATIVE_BONUS_MEMBER2"
+      },
+      {
+        label: "CUMULATIVE_BONUS_MEMBER3",
+        value: "CUMULATIVE_BONUS_MEMBER3"
+      },
+      {
+        label: "CUMULATIVE_BONUS_MEMBER4",
+        value: "CUMULATIVE_BONUS_MEMBER4"
+      },
+      {
+        label: "CUMULATIVE_BONUS_MEMBER5",
+        value: "CUMULATIVE_BONUS_MEMBER5"
+      },
+      {
+        label: "CUMULATIVE_BONUS_MEMBER6",
+        value: "CUMULATIVE_BONUS_MEMBER6"
+      },
+      {
+        label: "CUMULATIVE_BONUS_MEMBER7",
+        value: "CUMULATIVE_BONUS_MEMBER7"
+      },
+      {
+        label: "PA rider premium_1",
+        value: "PA rider premium_1"
+      },
+      {
+        label: "PA rider premium_2",
+        value: "PA rider premium_2"
+      },
+      {
+        label: "PA rider premium_3",
+        value: "PA rider premium_3"
+      },
+      {
+        label: "PA rider premium_4",
+        value: "PA rider premium_4"
+      },
+      {
+        label: "PA rider premium_5",
+        value: "PA rider premium_5"
+      },
+      {
+        label: "PA rider premium_6",
+        value: "PA rider premium_6"
+      },
+      {
+        label: "PA rider premium_7",
+        value: "PA rider premium_7"
+      },
+      {
+        label: "Scheme Type_Upsell 1",
+        value: "Scheme Type_Upsell 1"
+      },
+      {
+        label: "Scheme Type_Upsell 2",
+        value: "Scheme Type_Upsell 2"
+      },
+      {
+        label: "Scheme Type_Upsell 3",
+        value: "Scheme Type_Upsell 3"
+      },
+      {
+        label: "Scheme Type_Upsell 4",
+        value: "Scheme Type_Upsell 4"
+      },
+      {
+        label: "Scheme Type_Upsell 5",
+        value: "Scheme Type_Upsell 5"
+      },
+      {
+        label: "Scheme Type_Upsell 6",
+        value: "Scheme Type_Upsell 6"
+      },
+      {
+        label: "Scheme Type_Upsell 7",
+        value: "Scheme Type_Upsell 7"
+      },
+      {
+        label: "Scheme Type_Upsell 8",
+        value: "Scheme Type_Upsell 8"
+      },
+      {
+        label: "Scheme Type_Upsell 9",
+        value: "Scheme Type_Upsell 9"
+      },
+      {
+        label: "As-Is Renewal Premium ",
+        value: "As-Is Renewal Premium "
+      },
+      {
+        label: "Member 1 As-Is Premium",
+        value: "Member 1 As-Is Premium"
+      },
+      {
+        label: "Member 3 Premium",
+        value: "Member 3 Premium"
+      },
+      {
+        label: "Member 4 Premium",
+        value: "Member 4 Premium"
+      },
+      {
+        label: "Member 5 Premium",
+        value: "Member 5 Premium"
+      },
+      {
+        label: "Member 6 Premium",
+        value: "Member 6 Premium"
+      },
+      {
+        label: "Member 7 Premium",
+        value: "Member 7 Premium"
+      },
+      {
+        label: "Upgrade Tenure 1",
+        value: "Upgrade Tenure 1"
+      },
+      {
+        label: "Upgrade Tenure 1 Premium",
+        value: "Upgrade Tenure 1 Premium"
+      },
+      {
+        label: "Upgrade Tenure 2",
+        value: "Upgrade Tenure 2"
+      },
+      {
+        label: "Upgrade Tenure 2 Premium",
+        value: "Upgrade Tenure 2 Premium"
+      },
+      {
+        label: "Upgrade SI 1",
+        value: "Upgrade SI 1"
+      },
+      {
+        label: "Upgrade SI 1 Premium",
+        value: "Upgrade SI 1 Premium"
+      },
+      {
+        label: "Upgrade SI 2 Premium",
+        value: "Upgrade SI 2 Premium"
+      },
+      {
+        label: "MediCare Without PA rider ",
+        value: "MediCare Without PA rider "
+      },
+      {
+        label: "MediCare with PA rider  Premium ",
+        value: "MediCare with PA rider  Premium "
+      },
+      {
+        label: "MediCare with No room restriction ",
+        value: "MediCare with No room restriction "
+      },
+      {
+        label: "Medicare Premier  Premium ",
+        value: "Medicare Premier  Premium "
+      },
+      {
+        label: "MediCare Plus Global rider  Premium ",
+        value: "MediCare Plus Global rider  Premium "
+      },
+      {
+        label: "CSGT",
+        value: "CSGT"
+      },
+      {
+        label: "CGST %",
+        value: "CGST %"
+      },
+      {
+        label: "SGST",
+        value: "SGST"
+      },
+      {
+        label: "SGST %",
+        value: "SGST %"
+      },
+      {
+        label: "CSGT",
+        value: "CSGT"
+      },
+      {
+        label: "CGST %",
+        value: "CGST %"
+      },
+      {
+        label: "SGST",
+        value: "SGST"
+      },
+      {
+        label: "SGST %",
+        value: "SGST %"
+      },
+      {
+        label: "Tenure 1 Upgrade Total Tax",
+        value: "Tenure 1 Upgrade Total Tax"
+      },
+      {
+        label: "CSGT",
+        value: "CSGT"
+      },
+      {
+        label: "CGST %",
+        value: "CGST %"
+      },
+      {
+        label: "SGST",
+        value: "SGST"
+      },
+      {
+        label: "SGST %",
+        value: "SGST %"
+      },
+      {
+        label: "Tenure 2 Upgrade Total Tax",
+        value: "Tenure 2 Upgrade Total Tax"
+      },
+      {
+        label: "CSGT",
+        value: "CSGT"
+      },
+      {
+        label: "CGST %",
+        value: "CGST %"
+      },
+      {
+        label: "SGST",
+        value: "SGST"
+      },
+      {
+        label: "SGST %",
+        value: "SGST %"
+      },
+      {
+        label: "Upgrade SI 1 Total Tax",
+        value: "Upgrade SI 1 Total Tax"
+      },
+      {
+        label: "CSGT",
+        value: "CSGT"
+      },
+      {
+        label: "CGST %",
+        value: "CGST %"
+      },
+      {
+        label: "SGST",
+        value: "SGST"
+      },
+      {
+        label: "SGST %",
+        value: "SGST %"
+      },
+      {
+        label: "Upgrade SI 2 Total Tax",
+        value: "Upgrade SI 2 Total Tax"
+      },
+      {
+        label: "CSGT",
+        value: "CSGT"
+      },
+      {
+        label: "CGST %",
+        value: "CGST %"
+      },
+      {
+        label: "SGST",
+        value: "SGST"
+      },
+      {
+        label: "SGST %",
+        value: "SGST %"
+      },
+      {
+        label: "MediCare Without PA ride Total Tax",
+        value: "MediCare Without PA ride Total Tax"
+      },
+      {
+        label: "CSGT",
+        value: "CSGT"
+      },
+      {
+        label: "CGST %",
+        value: "CGST %"
+      },
+      {
+        label: "SGST",
+        value: "SGST"
+      },
+      {
+        label: "SGST %",
+        value: "SGST %"
+      },
+      {
+        label: "MediCare with PA rider Total Tax",
+        value: "MediCare with PA rider Total Tax"
+      },
+      {
+        label: "CSGT",
+        value: "CSGT"
+      },
+      {
+        label: "CGST %",
+        value: "CGST %"
+      },
+      {
+        label: "SGST",
+        value: "SGST"
+      },
+      {
+        label: "SGST %",
+        value: "SGST %"
+      },
+      {
+        label: "MediCare with No room restriction  Total Tax",
+        value: "MediCare with No room restriction  Total Tax"
+      },
+      {
+        label: "CSGT",
+        value: "CSGT"
+      },
+      {
+        label: "CGST %",
+        value: "CGST %"
+      },
+      {
+        label: "SGST",
+        value: "SGST"
+      },
+      {
+        label: "SGST %",
+        value: "SGST %"
+      },
+      {
+        label: "Medicare Premier Total Tax",
+        value: "Medicare Premier Total Tax"
+      },
+      {
+        label: "CSGT",
+        value: "CSGT"
+      },
+      {
+        label: "CGST %",
+        value: "CGST %"
+      },
+      {
+        label: "SGST",
+        value: "SGST"
+      },
+      {
+        label: "SGST %",
+        value: "SGST %"
+      },
+      {
+        label: "MediCare Plus Global rider Total Tax",
+        value: "MediCare Plus Global rider Total Tax"
+      },
+      {
+        label: "As-Is Renewal Premium with Tax",
+        value: "As-Is Renewal Premium with Tax"
+      },
+      {
+        label: "Upgrade Tenure 1 Premium with Tax",
+        value: "Upgrade Tenure 1 Premium with Tax"
+      },
+      {
+        label: "Upgrade Tenure 2 Premium with Tax",
+        value: "Upgrade Tenure 2 Premium with Tax"
+      },
+      {
+        label: "Upgrade SI 1 Premium with Tax",
+        value: "Upgrade SI 1 Premium with Tax"
+      },
+      {
+        label: "Upgrade SI 2 Premium with Tax",
+        value: "Upgrade SI 2 Premium with Tax"
+      },
+      {
+        label: "MediCare Without PA rider  Premium with Tax",
+        value: "MediCare Without PA rider  Premium with Tax"
+      },
+      {
+        label: "MediCare with PA rider  Premium with Tax",
+        value: "MediCare with PA rider  Premium with Tax"
+      },
+      {
+        label: "MediCare with No room restriction  Premium with Tax",
+        value: "MediCare with No room restriction  Premium with Tax"
+      },
+      {
+        label: "Medicare Premier  Premium with Tax",
+        value: "Medicare Premier  Premium with Tax"
+      },
+      {
+        label: "MediCare Plus Global rider  Premium with Tax",
+        value: "MediCare Plus Global rider  Premium with Tax"
+      },
+      {
+        label: "STP/NSTP Flag",
+        value: "STP/NSTP Flag"
+      },
+      {
+        label: "Type Of Claim",
+        value: "Type Of Claim"
+      },
+      {
+        label: "Agent State Code",
+        value: "Agent State Code"
+      },
+      {
+        label: "Customer State Code",
+        value: "Customer State Code"
+      },
     ]
 
     for (let i = 1; i <= member_max_length; i++) {
